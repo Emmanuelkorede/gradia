@@ -255,8 +255,13 @@ function ModeCard({ active, onClick, title, desc, icon, color, locked }) {
       }`}>
         {icon}
       </div>
-      <p className="text-sm font-black text-[#1a3312] dark:text-white">{title}</p>
-      <p className="text-[10px] leading-tight text-green-800/60 dark:text-green-200/40 mt-1">{desc}</p>
+      {/* Added conditional text-black classes below when active is true */}
+      <p className={`text-sm font-black ${active ? "text-black" : "text-[#1a3312] dark:text-white"}`}>
+        {title}
+      </p>
+      <p className={`text-[10px] leading-tight mt-1 ${active ? "text-black/70" : "text-green-800/60 dark:text-green-200/40"}`}>
+        {desc}
+      </p>
       {locked && <span className="absolute top-4 right-4 text-xs">🔒</span>}
     </button>
   );

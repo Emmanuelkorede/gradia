@@ -6,6 +6,7 @@ export function useQuestions({
   subjects = [],
   limit = 100,
   enabled = true,
+  isPremium = false, // 1. Pass down the user's premium status here
 } = {}) {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -20,29 +21,43 @@ export function useQuestions({
     try {
       const perSubjectLimit = Math.ceil(limit / subjects.length);
       
-      const fetchPromises = subjects.map((subject) =>
-        supabase
+      const fetchPromises = subjects.map((subject) => {
+        let query = supabase
           .from("questions")
           .select("id, school, subject, question_text, option_a, option_b, option_c, option_d, correct_option, explanation")
           .eq("school", school)
-          .eq("subject", subject)
-          .limit(perSubjectLimit + 20)
-      );
+          .eq("subject", subject);
+
+        if (isPremium) {
+          // Premium track: Pull anything and grab extra rows so shuffling feels random
+          return query.limit(perSubjectLimit + 20);
+        } else {
+          // Free track: Pull ONLY rows marked as free, ordered strictly by id
+          return query
+            .eq("is_free", true)
+            .order("id", { ascending: true })
+            .limit(perSubjectLimit);
+        }
+      });
 
       const results = await Promise.all(fetchPromises);
 
-      // ── THE NEW LOGIC: Grouped but Shuffled ──
+      // ── THE CONDITIONAL LOGIC: Grouped by subject ──
       const organizedQuestions = results.flatMap((res) => {
         const rawData = res.data ?? [];
+        let subjectPool = [];
+
+        if (isPremium) {
+          // 1. Shuffle only for premium users
+          const shuffled = rawData.sort(() => Math.random() - 0.5);
+          subjectPool = shuffled.slice(0, perSubjectLimit);
+        } else {
+          // 2. Free users get the raw data exactly as returned (sorted by ID)
+          subjectPool = rawData;
+        }
         
-        // 1. Shuffle only the questions for THIS specific subject
-        const shuffledSubjectPool = rawData.sort(() => Math.random() - 0.5);
-        
-        // 2. Take only the number needed for this subject
-        const selectedForSubject = shuffledSubjectPool.slice(0, perSubjectLimit);
-        
-        // 3. Map the options into the object format you need
-        return selectedForSubject.map(q => ({
+        // 3. Map the options into the uniform structure required by QuestionCard
+        return subjectPool.map(q => ({
           ...q,
           options: {
             A: q.option_a,
@@ -52,10 +67,6 @@ export function useQuestions({
           }
         }));
       });
-
-      // We DON'T shuffle 'organizedQuestions' again here. 
-      // Because we flatMapped the subjects in order, they stay grouped: 
-      // [Eng, Eng, Eng, Math, Math, Math...]
       
       setQuestions(organizedQuestions.slice(0, limit)); 
       
@@ -65,7 +76,7 @@ export function useQuestions({
     } finally {
       setLoading(false);
     }
-  }, [school, subjects.join(","), limit, enabled]);
+  }, [school, subjects.join(","), limit, enabled, isPremium]); // Added isPremium dependency
 
   useEffect(() => {
     fetchQuestions();
