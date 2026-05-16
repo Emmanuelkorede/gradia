@@ -8,6 +8,7 @@ import OnboardingPage from "./pages/OnboardingPage"
 import LeaderboardPage from "./pages/LeaderboardPage"
 import ProfilePage from "./pages/ProfilePage"
 import ResultPage from "./pages/ResultPage"
+import NotificationPage from "./pages/NotificationPage";
 
 export default function App() {
   return (
@@ -21,7 +22,7 @@ export default function App() {
             <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/cbt/result" element={<ResultPage />} />
-
+            <Route path="/notifications" element={<NotificationPage />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/onboarding" element={<OnboardingPage />} />
           </Routes>

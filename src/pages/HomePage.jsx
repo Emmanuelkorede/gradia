@@ -4,7 +4,6 @@ import { useAuth } from "../hooks/useAuth";
 import { SchoolContext } from "../context/SchoolContext";
 import { supabase } from "../lib/supabaseClient";
 import ActivationCard from "../components/home/ActivationCard";
-import NewsFeedItem from "../components/home/NewsFeedItem";
 import WinnerPopup from "../components/leaderboard/WinnerPopup";
 import BottomNav from '../components/ui/BottomNav';
 import { HiOutlineBell, HiFire, HiLightningBolt, HiBookOpen, HiInbox } from "react-icons/hi";
