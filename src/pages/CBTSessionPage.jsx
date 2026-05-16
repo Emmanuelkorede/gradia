@@ -2,19 +2,21 @@ import { useEffect, useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useQuestions } from "../hooks/useQuestions";
 import { useTestSession } from "../hooks/useTestSession";
+import { useAuth } from "../hooks/useAuth"; // 1. Make sure to import useAuth
 import QuestionCard from "../components/cbt/QuestionCard";
 import QuestionMap from "../components/cbt/QuestionMap";
 import Timer from "../components/cbt/Timer";
 import Calculator from "../components/cbt/Calculator";
 import Modal from "../components/ui/Modal";
-import ProfileModal from "../components/ui/profileModal";
 import Spinner from "../components/ui/Spinner";
 import Button from "../components/ui/Button";
-import { HiX, HiCalculator, HiViewGrid, HiCheckCircle } from "react-icons/hi";
+import ProfileModal from "../components/ui/profileModal"
+import { HiChevronLeft, HiCalculator, HiViewGrid, HiArrowRight  , HiX, HiCheckCircle} from "react-icons/hi";
 
 export default function CBTSessionPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isPremium } = useAuth(); // 2. Grab premium status from context
 
   const {
     mode = "test",
@@ -30,7 +32,11 @@ export default function CBTSessionPage() {
   }, [location.state, navigate]);
 
   const { questions, loading } = useQuestions({
-    school, subjects, limit: questionCount, enabled: subjects.length > 0,
+    school, 
+    subjects, 
+    limit: questionCount, 
+    enabled: subjects.length > 0,
+    isPremium, 
   });
 
   const session = useTestSession({
@@ -73,7 +79,7 @@ export default function CBTSessionPage() {
     </div>
   );
 
-  return (
+ return (
     <div className="min-h-screen bg-[#f8faf7] dark:bg-[#0b160a] font-sans flex flex-col pb-28">
       
       {/* ── HEADER: Timer & Quit ────────────────────────────────── */}
@@ -209,6 +215,4 @@ export default function CBTSessionPage() {
     </div>
   );
 }
-
-
 
