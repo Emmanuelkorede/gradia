@@ -7,6 +7,7 @@ import QuestionMap from "../components/cbt/QuestionMap";
 import Timer from "../components/cbt/Timer";
 import Calculator from "../components/cbt/Calculator";
 import Modal from "../components/ui/Modal";
+import ProfileModal from "../components/ui/profileModal";
 import Spinner from "../components/ui/Spinner";
 import Button from "../components/ui/Button";
 import { HiX, HiCalculator, HiViewGrid, HiCheckCircle } from "react-icons/hi";
@@ -202,9 +203,9 @@ export default function CBTSessionPage() {
         onJump={(i) => { session.jumpTo(i); setMapOpen(false); }} mode={mode} 
       />
 
-      <Modal isOpen={calcOpen} onClose={() => setCalcOpen(false)} title="Scientific Tool">
+      <ProfileModal isOpen={calcOpen} onClose={() => setCalcOpen(false)} title="Scientific Tool">
         <Calculator />
-      </Modal>
+      </ProfileModal>
     </div>
   );
 }

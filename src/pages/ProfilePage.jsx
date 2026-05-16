@@ -1,56 +1,51 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { SchoolContext } from "../context/SchoolContext";
+import { ThemeContext } from "../context/ThemeContext";
 import { supabase } from "../lib/supabaseClient";
 import GradiaLogo from "../components/ui/logo";
 import Button from "../components/ui/Button";
-import Modal from "../components/ui/Modal";
+import ProfileModal from "../components/ui/ProfileModal";
 import BottomNav from "../components/ui/BottomNav";
-
 
 const SCHOOLS = [
   { id: "UI",     name: "University of Ibadan",         color: "#3b82f6", bg: "#dbeafe", emoji: "🔵" },
-  { id: "UNILAG", name: "University of Lagos",           color: "#ef4444", bg: "#fee2e2", emoji: "🔴" },
+  { id: "UNILAG", name: "University of Lagos",          color: "#ef4444", bg: "#fee2e2", emoji: "🔴" },
   { id: "OAU",    name: "Obafemi Awolowo University",   color: "#16a34a", bg: "#dcfce7", emoji: "🟢" },
 ];
 
-function useColorScheme() {
-  const [dark, setDark] = useState(
-    () => window.matchMedia("(prefers-color-scheme: dark)").matches
-  );
-  function toggle() {
-    // In a real app you'd set a class on <html> and persist to localStorage.
-    // Here we just track local state as a demo.
-    setDark((d) => !d);
-    document.documentElement.classList.toggle("dark");
-  }
-  return { dark, toggle };
-}
+const WHATSAPP_URL = "https://wa.me/2349122865246";
 
 export default function ProfilePage() {
   const { user, profile, isPremium, logout, refreshProfile } = useAuth();
   const { selectedSchool, setSelectedSchool } = useContext(SchoolContext);
+  const { isDark, toggleDarkMode } = useContext(ThemeContext);
   const navigate = useNavigate();
-
-  const { dark, toggle: toggleDark } = useColorScheme();
 
   const [notifEnabled,   setNotifEnabled]   = useState(true);
   const [editNameOpen,   setEditNameOpen]   = useState(false);
   const [logoutOpen,     setLogoutOpen]     = useState(false);
-  const [deleteOpen,     setDeleteOpen]     = useState(false);
+  const [aboutOpen,      setAboutOpen]      = useState(false);
+  const [premiumGateOpen, setPremiumGateOpen] = useState(false);
+  
   const [newName,        setNewName]        = useState(profile?.display_name ?? "");
   const [nameLoading,    setNameLoading]    = useState(false);
   const [nameError,      setNameError]      = useState(null);
   const [logoutLoading,  setLogoutLoading]  = useState(false);
   const [schoolSaving,   setSchoolSaving]   = useState(false);
 
+  useEffect(() => {
+    if (profile?.display_name) {
+      setNewName(profile.display_name);
+    }
+  }, [profile]);
+
   const initials = (profile?.display_name ?? user?.email ?? "?")
     .split(" ").map((w) => w[0]?.toUpperCase() ?? "").slice(0, 2).join("");
 
   const hue = ((profile?.display_name ?? "").charCodeAt(0) * 37 + ((profile?.display_name ?? "").charCodeAt(1) ?? 0) * 13) % 360;
 
-  // ── Save display name ────────────────────────────────────────────
   async function saveDisplayName() {
     if (!newName.trim() || newName.trim().length < 2) {
       setNameError("Name must be at least 2 characters.");
@@ -73,8 +68,11 @@ export default function ProfilePage() {
     }
   }
 
-  // ── Switch school ────────────────────────────────────────────────
   async function switchSchool(schoolId) {
+    if (!isPremium) {
+      setPremiumGateOpen(true);
+      return;
+    }
     if (schoolId === selectedSchool) return;
     setSchoolSaving(true);
     setSelectedSchool(schoolId);
@@ -91,7 +89,6 @@ export default function ProfilePage() {
     }
   }
 
-  // ── Logout ───────────────────────────────────────────────────────
   async function handleLogout() {
     setLogoutLoading(true);
     try {
@@ -105,453 +102,209 @@ export default function ProfilePage() {
   }
 
   return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    <div className="min-h-screen bg-[#f5f9f2] dark:bg-[#0b160a] font-sans pb-24 transition-colors duration-200">
+      
+      {/* ── Hero section ───────────────────────────────────────── */}
+      <div className="bg-gradient-to-br from-[#0d2c08] via-[#1a4a10] to-[#0e3208] padding pt-14 px-5 pb-7 flex flex-col items-center text-center relative overflow-hidden">
+        <div className="absolute top-[-60px] left-[-60px] w-[200px] h-[200px] rounded-full pointer-events-none bg-[radial-gradient(circle,rgba(90,200,72,.18),transparent_70%)]" />
+        <div className="absolute bottom-[-40px] right-[-40px] w-[160px] h-[160px] rounded-full pointer-events-none bg-[radial-gradient(circle,rgba(61,120,48,.22),transparent_70%)]" />
 
-        .prof-root {
-          min-height: 100dvh;
-          background: #f5f9f2;
-          font-family: 'Plus Jakarta Sans', sans-serif;
-          padding-bottom: 100px;
-        }
-        @media (prefers-color-scheme: dark) { .prof-root { background: #0b160a; } }
-
-        /* ── Hero card ───────────────────────────────────────────── */
-        .prof-hero {
-          background: linear-gradient(160deg, #0d2c08 0%, #1a4a10 55%, #0e3208 100%);
-          padding: 56px 20px 28px;
-          display: flex; flex-direction: column; align-items: center;
-          text-align: center; position: relative; overflow: hidden;
-        }
-        .hero-orb { position: absolute; border-radius: 50%; pointer-events: none; }
-        .hero-orb-1 { top:-60px; left:-60px; width:200px; height:200px; background:radial-gradient(circle,rgba(90,200,72,.18),transparent 70%); }
-        .hero-orb-2 { bottom:-40px; right:-40px; width:160px; height:160px; background:radial-gradient(circle,rgba(61,120,48,.22),transparent 70%); }
-
-        .prof-avatar {
-          width: 72px; height: 72px; border-radius: 50%;
-          display: flex; align-items: center; justify-content: center;
-          font-size: 22px; font-weight: 700; color: #fff;
-          border: 3px solid rgba(255,255,255,0.2);
-          margin-bottom: 12px; position: relative;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-        .prof-avatar-edit {
-          position: absolute; bottom: 0; right: 0;
-          width: 22px; height: 22px; border-radius: 50%;
-          background: #5a9e48; border: 2px solid #0d2c08;
-          display: flex; align-items: center; justify-content: center;
-          cursor: pointer;
-        }
-        .prof-name {
-          font-family: 'Playfair Display', Georgia, serif;
-          font-size: 22px; font-weight: 900; color: #fff;
-          margin-bottom: 5px; line-height: 1.1;
-        }
-        .prof-email { font-size: 11.5px; color: rgba(255,255,255,0.45); margin-bottom: 12px; }
-        .prof-badges { display: flex; align-items: center; justify-content: center; gap: 7px; flex-wrap: wrap; }
-        .p-badge {
-          display: inline-flex; align-items: center; gap: 4px;
-          border-radius: 20px; padding: 4px 11px;
-          font-size: 10.5px; font-weight: 700;
-          border: 1px solid rgba(255,255,255,.18);
-        }
-        .p-badge-premium { background: rgba(251,191,36,0.2); color: #fbbf24; }
-        .p-badge-free    { background: rgba(255,255,255,0.1); color: rgba(255,255,255,.6); }
-        .p-badge-school  { color: rgba(255,255,255,0.75); }
-
-        /* ── Body ────────────────────────────────────────────────── */
-        .prof-body { padding: 18px 16px; display: flex; flex-direction: column; gap: 18px; }
-
-        /* Section */
-        .pf-section {
-          background: #fff;
-          border: 1px solid rgba(90,158,72,0.1);
-          border-radius: 20px; overflow: hidden;
-        }
-        @media (prefers-color-scheme: dark) {
-          .pf-section { background: #111e0f; border-color: rgba(90,158,72,.12); }
-        }
-        .pf-section-title {
-          font-size: 10px; font-weight: 700;
-          text-transform: uppercase; letter-spacing: .09em;
-          color: #6a9e5e; padding: 13px 16px 8px;
-          border-bottom: 1px solid rgba(90,158,72,.08);
-        }
-        @media (prefers-color-scheme: dark) { .pf-section-title { border-bottom-color: rgba(90,158,72,.1); } }
-
-        /* Row */
-        .pf-row {
-          display: flex; align-items: center; gap: 12px;
-          padding: 13px 16px;
-          border-bottom: 1px solid rgba(90,158,72,.06);
-          cursor: default;
-          transition: background 0.15s;
-        }
-        .pf-row:last-child { border-bottom: none; }
-        .pf-row.clickable { cursor: pointer; }
-        .pf-row.clickable:hover { background: rgba(90,158,72,.04); }
-        .pf-row.clickable:active { background: rgba(90,158,72,.08); }
-        @media (prefers-color-scheme: dark) {
-          .pf-row.clickable:hover { background: rgba(90,158,72,.08); }
-        }
-        .pf-row-icon {
-          width: 36px; height: 36px; border-radius: 10px;
-          display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0; font-size: 17px;
-        }
-        .pf-row-icon.green  { background: rgba(90,158,72,.12); }
-        .pf-row-icon.blue   { background: rgba(59,130,246,.12); }
-        .pf-row-icon.amber  { background: rgba(251,191,36,.12); }
-        .pf-row-icon.red    { background: rgba(239,68,68,.12);  }
-        .pf-row-icon.purple { background: rgba(168,85,247,.12); }
-        .pf-row-icon.gray   { background: rgba(107,114,128,.1); }
-
-        .pf-row-content { flex: 1; min-width: 0; }
-        .pf-row-label {
-          font-size: 13.5px; font-weight: 600; color: #1a3312;
-          line-height: 1.2; margin-bottom: 1px;
-        }
-        @media (prefers-color-scheme: dark) { .pf-row-label { color: #d8f0c8; } }
-        .pf-row-sub { font-size: 11px; color: #9ab88a; font-weight: 500; }
-        .pf-row-label.danger { color: #dc2626; }
-        @media (prefers-color-scheme: dark) { .pf-row-label.danger { color: #f87171; } }
-
-        /* Chevron */
-        .pf-chevron { color: #c8e0b0; flex-shrink: 0; }
-        @media (prefers-color-scheme: dark) { .pf-chevron { color: #2a4e22; } }
-
-        /* Toggle switch */
-        .toggle-wrap { display: flex; align-items: center; gap: 0; cursor: pointer; }
-        .toggle-track {
-          width: 44px; height: 24px; border-radius: 12px;
-          position: relative; transition: background 0.25s;
-          flex-shrink: 0;
-        }
-        .toggle-track.on  { background: #5a9e48; }
-        .toggle-track.off { background: #d1d5db; }
-        @media (prefers-color-scheme: dark) { .toggle-track.off { background: #374151; } }
-        .toggle-thumb {
-          position: absolute; top: 2px;
-          width: 20px; height: 20px; border-radius: 50%;
-          background: #fff;
-          box-shadow: 0 1px 4px rgba(0,0,0,.25);
-          transition: transform 0.25s cubic-bezier(.22,1,.36,1);
-        }
-        .toggle-track.on  .toggle-thumb { transform: translateX(20px); }
-        .toggle-track.off .toggle-thumb { transform: translateX(2px); }
-
-        /* School option */
-        .school-option {
-          display: flex; align-items: center; gap: 10px;
-          padding: 12px 16px;
-          border-bottom: 1px solid rgba(90,158,72,.06);
-          cursor: pointer; transition: background 0.15s;
-        }
-        .school-option:last-child { border-bottom: none; }
-        .school-option:hover { background: rgba(90,158,72,.04); }
-        .school-option:active { background: rgba(90,158,72,.08); }
-        .school-option.active-school { background: rgba(90,158,72,.05); }
-        @media (prefers-color-scheme: dark) {
-          .school-option:hover { background: rgba(90,158,72,.08); }
-          .school-option.active-school { background: rgba(90,158,72,.1); }
-        }
-        .school-emoji { font-size: 20px; flex-shrink: 0; width: 36px; text-align: center; }
-        .school-info { flex: 1; }
-        .school-name-main { font-size: 13px; font-weight: 700; color: #1a3312; margin-bottom: 1px; }
-        @media (prefers-color-scheme: dark) { .school-name-main { color: #d8f0c8; } }
-        .school-id-tag {
-          display: inline-flex; align-items: center; gap: 3px;
-          font-size: 9.5px; font-weight: 700;
-          padding: 1px 7px; border-radius: 20px;
-        }
-        .school-radio {
-          width: 20px; height: 20px; border-radius: 50%;
-          border: 2px solid #c8e0b0; flex-shrink: 0;
-          display: flex; align-items: center; justify-content: center;
-          transition: all 0.2s;
-        }
-        .school-radio.selected { border-color: #5a9e48; background: #5a9e48; }
-        .school-radio-dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
-
-        /* Version footer */
-        .prof-version {
-          text-align: center;
-          font-size: 11px; color: #b8d4a8; padding: 8px 0;
-          display: flex; flex-direction: column; align-items: center; gap: 4px;
-        }
-
-        /* Edit name input */
-        .name-input {
-          width: 100%;
-          background: #f0f8eb;
-          border: 1.5px solid #c8e0b8;
-          border-radius: 14px; padding: 13px 16px;
-          font-size: 15px; font-family: 'Plus Jakarta Sans', sans-serif;
-          color: #1a3312; outline: none;
-          transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .name-input:focus {
-          border-color: #5a9e48;
-          box-shadow: 0 0 0 3px rgba(90,158,72,.15);
-        }
-        @media (prefers-color-scheme: dark) {
-          .name-input { background: #1a2e17; border-color: #243d1e; color: #e8f5e4; }
-        }
-      `}</style>
-
-      <div className="prof-root">
-
-        {/* ── Hero ───────────────────────────────────────────────── */}
-        <div className="prof-hero">
-          <div className="hero-orb hero-orb-1" />
-          <div className="hero-orb hero-orb-2" />
-
-          {/* Avatar */}
+        {/* Avatar */}
+        <div
+          className="w-[72px] h-[72px] rounded-full flex items-center justify-center text-[22px] font-bold text-white border-3 border-white/20 mb-3 relative shadow-xl"
+          style={{ background: `hsl(${hue}, 50%, 38%)` }}
+        >
+          {initials}
           <div
-            className="prof-avatar"
-            style={{ background: `hsl(${hue}, 50%, 38%)` }}
+            className="absolute bottom-0 right-0 w-[22px] h-[22px] rounded-full bg-[#5a9e48] border-2 border-[#0d2c08] flex items-center justify-center cursor-pointer"
+            onClick={() => { setNewName(profile?.display_name ?? ""); setEditNameOpen(true); }}
           >
-            {initials}
-            <div
-              className="prof-avatar-edit"
-              onClick={() => { setNewName(profile?.display_name ?? ""); setEditNameOpen(true); }}
-              title="Edit name"
-            >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
-                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </div>
-          </div>
-
-          <h1 className="prof-name">{profile?.display_name ?? "Student"}</h1>
-          <p className="prof-email">{user?.email}</p>
-
-          <div className="prof-badges">
-            {isPremium ? (
-              <span className="p-badge p-badge-premium">✨ Premium Member</span>
-            ) : (
-              <span className="p-badge p-badge-free">Free Plan</span>
-            )}
-            <span className="p-badge p-badge-school">
-              {selectedSchool} Aspirant
-            </span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
           </div>
         </div>
 
-        <div className="prof-body">
+        <h1 className="font-serif text-[22px] font-black text-white mb-1.5 leading-none">{profile?.display_name ?? "Student"}</h1>
+        <p className="text-[11.5px] color text-white/45 mb-3">{user?.email}</p>
 
-          {/* ── Upgrade card (free users only) ─────────────────── */}
-          {!isPremium && (
-            <div style={{
-              background: "linear-gradient(135deg,#3d7830,#5a9e48)",
-              borderRadius: 20, padding: "16px 18px",
-              display: "flex", alignItems: "center", gap: 12,
-              boxShadow: "0 6px 24px rgba(58,120,40,0.3)",
-            }}>
-              <span style={{ fontSize: 28 }}>🔐</span>
-              <div style={{ flex: 1 }}>
-                <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 900, color: "#fff", marginBottom: 2 }}>
-                  Unlock Gradia Premium
-                </p>
-                <p style={{ fontSize: 11, color: "rgba(255,255,255,.7)", lineHeight: 1.5 }}>
-                  Study mode, leaderboard & explanations
-                </p>
-              </div>
-              <button style={{
-                background: "#fff", color: "#3d7830", border: "none",
-                borderRadius: 12, padding: "9px 14px",
-                fontFamily: "inherit", fontSize: 12, fontWeight: 700, cursor: "pointer",
-                flexShrink: 0, whiteSpace: "nowrap",
-              }}>
-                ₦2,500
-              </button>
-            </div>
+        <div className="flex items-center justify-center gap-1.5 flex-wrap">
+          {isPremium ? (
+            <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10.5px] font-bold border border-white/18 bg-amber-500/20 text-amber-400">✨ Premium Member</span>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10.5px] font-bold border border-white/18 bg-white/10 text-white/60">Free Plan</span>
           )}
-
-          {/* ── Target School ───────────────────────────────────── */}
-          <div className="pf-section">
-            <p className="pf-section-title">Target School</p>
-            {SCHOOLS.map((s) => {
-              const isActive = selectedSchool === s.id;
-              return (
-                <div
-                  key={s.id}
-                  className={`school-option ${isActive ? "active-school" : ""}`}
-                  onClick={() => switchSchool(s.id)}
-                  role="radio"
-                  aria-checked={isActive}
-                >
-                  <span className="school-emoji">{s.emoji}</span>
-                  <div className="school-info">
-                    <p className="school-name-main">{s.name}</p>
-                    <span
-                      className="school-id-tag"
-                      style={{ background: s.bg, color: s.color }}
-                    >
-                      {s.id}
-                    </span>
-                  </div>
-                  {schoolSaving && isActive ? (
-                    <svg style={{ animation: "gradia-spin .7s linear infinite", color: "#5a9e48" }} width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <style>{"@keyframes gradia-spin{to{transform:rotate(360deg)}}"}</style>
-                      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeOpacity=".3"/>
-                      <path d="M12 3a9 9 0 019 9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
-                    </svg>
-                  ) : (
-                    <div className={`school-radio ${isActive ? "selected" : ""}`}>
-                      {isActive && <div className="school-radio-dot" />}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* ── Preferences ─────────────────────────────────────── */}
-          <div className="pf-section">
-            <p className="pf-section-title">Preferences</p>
-
-            {/* Dark mode */}
-            <div className="pf-row">
-              <div className="pf-row-icon gray">
-                {dark ? "🌙" : "☀️"}
-              </div>
-              <div className="pf-row-content">
-                <p className="pf-row-label">Dark Mode</p>
-                <p className="pf-row-sub">{dark ? "On" : "Off"}</p>
-              </div>
-              <div className="toggle-wrap" onClick={toggleDark} role="switch" aria-checked={dark}>
-                <div className={`toggle-track ${dark ? "on" : "off"}`}>
-                  <div className="toggle-thumb" />
-                </div>
-              </div>
-            </div>
-
-            {/* Notifications */}
-            <div className="pf-row">
-              <div className="pf-row-icon amber">🔔</div>
-              <div className="pf-row-content">
-                <p className="pf-row-label">Push Notifications</p>
-                <p className="pf-row-sub">News & announcements</p>
-              </div>
-              <div
-                className="toggle-wrap"
-                onClick={() => setNotifEnabled((n) => !n)}
-                role="switch"
-                aria-checked={notifEnabled}
-              >
-                <div className={`toggle-track ${notifEnabled ? "on" : "off"}`}>
-                  <div className="toggle-thumb" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── Account ─────────────────────────────────────────── */}
-          <div className="pf-section">
-            <p className="pf-section-title">Account</p>
-
-            {/* Edit name */}
-            <div
-              className="pf-row clickable"
-              onClick={() => { setNewName(profile?.display_name ?? ""); setEditNameOpen(true); }}
-            >
-              <div className="pf-row-icon green">✏️</div>
-              <div className="pf-row-content">
-                <p className="pf-row-label">Display Name</p>
-                <p className="pf-row-sub">{profile?.display_name ?? "Not set"}</p>
-              </div>
-              <svg className="pf-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
-            </div>
-
-            {/* Email (read-only) */}
-            <div className="pf-row">
-              <div className="pf-row-icon blue">✉️</div>
-              <div className="pf-row-content">
-                <p className="pf-row-label">Email</p>
-                <p className="pf-row-sub">{user?.email}</p>
-              </div>
-            </div>
-
-            {/* Member since */}
-            <div className="pf-row">
-              <div className="pf-row-icon purple">📅</div>
-              <div className="pf-row-content">
-                <p className="pf-row-label">Member Since</p>
-                <p className="pf-row-sub">
-                  {profile?.created_at
-                    ? new Date(profile.created_at).toLocaleDateString("en-NG", { month: "long", year: "numeric" })
-                    : "—"
-                  }
-                </p>
-              </div>
-            </div>
-
-            {/* Logout */}
-            <div className="pf-row clickable" onClick={() => setLogoutOpen(true)}>
-              <div className="pf-row-icon gray">🚪</div>
-              <div className="pf-row-content">
-                <p className="pf-row-label">Log Out</p>
-                <p className="pf-row-sub">Sign out of your account</p>
-              </div>
-              <svg className="pf-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
-            </div>
-
-            {/* Delete account */}
-            <div className="pf-row clickable" onClick={() => setDeleteOpen(true)}>
-              <div className="pf-row-icon red">🗑</div>
-              <div className="pf-row-content">
-                <p className="pf-row-label danger">Delete Account</p>
-                <p className="pf-row-sub">Permanently remove your data</p>
-              </div>
-              <svg className="pf-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
-            </div>
-          </div>
-
-          {/* ── About ───────────────────────────────────────────── */}
-          <div className="pf-section">
-            <p className="pf-section-title">About</p>
-            <div className="pf-row">
-              <div className="pf-row-icon green">
-                <GradiaLogo size={22} />
-              </div>
-              <div className="pf-row-content">
-                <p className="pf-row-label">Gradia</p>
-                <p className="pf-row-sub">Post-UTME CBT Prep · UI · UNILAG · OAU</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Version */}
-          <div className="prof-version">
-            <GradiaLogo size={28} wordmark />
-            <span>v1.0.0 · Made with 💚 for Nigerian students</span>
-          </div>
-
+          <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10.5px] font-bold border border-white/18 text-white/75">
+            {selectedSchool} Aspirant
+          </span>
         </div>
       </div>
 
-      {/* ── Edit Name Modal ───────────────────────────────────────── */}
-      <Modal
-        isOpen={editNameOpen}
-        onClose={() => setEditNameOpen(false)}
-        title="Change Display Name"
-        size="sm"
-        footer={
-          <>
-            <Button variant="ghost" size="sm" onClick={() => setEditNameOpen(false)}>Cancel</Button>
-            <Button size="md" loading={nameLoading} onClick={saveDisplayName}>Save</Button>
-          </>
-        }
-      >
-        <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", paddingBottom: 4 }}>
-          <p style={{ fontSize: 12.5, color: "#5a7e4e", marginBottom: 12, lineHeight: 1.6 }}>
-            This name is shown on the leaderboard and throughout the app.
-          </p>
+      <div className="max-w-2xl mx-auto px-4 mt-4.5 flex flex-col gap-4.5">
+
+        {/* ── Premium Promotion Card ─────────────────────────── */}
+        {!isPremium && (
+          <div className="bg-gradient-to-r from-[#3d7830] to-[#5a9e48] rounded-[20px] p-[16px_18px] flex items-center gap-3 shadow-md">
+            <span className="text-[28px]">🔐</span>
+            <div className="flex-1">
+              <p className="font-serif text-[15px] font-black text-white mb-0.5">Unlock Gradia Premium</p>
+              <p className="text-[11px] text-white/70 leading-normal">Study mode, leaderboard & explanations</p>
+            </div>
+            <button className="bg-white text-[#3d7830] border-none rounded-xl p-[9px_14px] font-sans text-xs font-bold whitespace-nowrap active:scale-95 transition-transform">
+              ₦2,500
+            </button>
+          </div>
+        )}
+
+        {/* ── Target School Section ───────────────────────────── */}
+        <div className="bg-white dark:bg-[#111e0f] border border-transparent dark:border-[#1f3319] shadow-xs rounded-[20px] overflow-hidden">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#6a9e5e] p-[13px_16px_8px] border-b border-green-900/5 dark:border-green-900/10">Target School</p>
+          {SCHOOLS.map((s) => {
+            const isActive = selectedSchool === s.id;
+            return (
+              <div
+                key={s.id}
+                className={`flex items-center gap-2.5 p-[12px_16px] border-b border-green-900/5 dark:border-green-900/5 last:border-b-0 cursor-pointer active:bg-green-900/5 dark:active:bg-green-900/10 transition-colors ${isActive ? "bg-green-900/[0.03] dark:bg-green-900/[0.06]" : ""}`}
+                onClick={() => switchSchool(s.id)}
+                role="radio"
+                aria-checked={isActive}
+              >
+                <span className="text-[20px] shrink-0 w-9 text-center">{s.emoji}</span>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-[#1a3312] dark:text-[#d8f0c8] mb-0.5">{s.name}</p>
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9.5px] font-bold" style={{ background: s.bg, color: s.color }}>
+                    {s.id}
+                  </span>
+                </div>
+                {schoolSaving && isActive ? (
+                  <svg className="animate-spin h-4 w-4 text-[#5a9e48]" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeOpacity=".3"/>
+                    <path d="M12 3a9 9 0 019 9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+                  </svg>
+                ) : (
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${isActive ? "border-[#5a9e48] bg-[#5a9e48]" : "border-[#c8e0b0]"}`}>
+                    {isActive && <div className="w-2 h-2 rounded-full bg-white" />}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Preferences Section ─────────────────────────────── */}
+        <div className="bg-white dark:bg-[#111e0f] border border-transparent dark:border-[#1f3319] shadow-xs rounded-[20px] overflow-hidden">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#6a9e5e] p-[13px_16px_8px] border-b border-green-900/5 dark:border-green-900/10">Preferences</p>
+
+          {/* Dark Mode Row */}
+          <div className="flex items-center gap-3 p-[13px_16px] border-b border-green-900/5 dark:border-green-900/5 last:border-b-0">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base bg-gray-500/10">
+              {isDark ? "🌙" : "☀️"}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13.5px] font-semibold text-[#1a3312] dark:text-[#d8f0c8] leading-tight mb-0.5">Dark Mode</p>
+              <p className="text-[11px] text-[#9ab88a] font-medium">{isDark ? "On" : "Off"}</p>
+            </div>
+            <div className="flex items-center cursor-pointer" onClick={toggleDarkMode} role="switch" aria-checked={isDark}>
+              <div className={`w-11 h-6 rounded-full relative transition-colors duration-250 shrink-0 ${isDark ? "bg-[#5a9e48]" : "bg-gray-300 dark:bg-gray-700"}`}>
+                <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-250 ${isDark ? "translate-x-5" : "translate-x-0.5"}`} />
+              </div>
+            </div>
+          </div>
+
+          {/* Notifications Row */}
+          <div className="flex items-center gap-3 p-[13px_16px] border-b border-green-900/5 dark:border-green-900/5 last:border-b-0">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base bg-amber-500/12">🔔</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13.5px] font-semibold text-[#1a3312] dark:text-[#d8f0c8] leading-tight mb-0.5">Push Notifications</p>
+              <p className="text-[11px] text-[#9ab88a] font-medium">News & announcements</p>
+            </div>
+            <div className="flex items-center cursor-pointer" onClick={() => setNotifEnabled(!notifEnabled)} role="switch" aria-checked={notifEnabled}>
+              <div className={`w-11 h-6 rounded-full relative transition-colors duration-250 shrink-0 ${notifEnabled ? "bg-[#5a9e48]" : "bg-gray-300 dark:bg-gray-700"}`}>
+                <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-250 ${notifEnabled ? "translate-x-5" : "translate-x-0.5"}`} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Account Section ─────────────────────────────────── */}
+        <div className="bg-white dark:bg-[#111e0f] border border-transparent dark:border-[#1f3319] shadow-xs rounded-[20px] overflow-hidden">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#6a9e5e] p-[13px_16px_8px] border-b border-green-900/5 dark:border-green-900/10">Account</p>
+
+          <div className="flex items-center gap-3 p-[13px_16px] border-b border-green-900/5 dark:border-green-900/5 last:border-b-0 cursor-pointer active:bg-green-900/[0.04] dark:active:bg-green-900/[0.08]" onClick={() => { setNewName(profile?.display_name ?? ""); setEditNameOpen(true); }}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base bg-green-500/12">✏️</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13.5px] font-semibold text-[#1a3312] dark:text-[#d8f0c8] leading-tight mb-0.5">Display Name</p>
+              <p className="text-[11px] text-[#9ab88a] font-medium">{profile?.display_name ?? "Not set"}</p>
+            </div>
+            <svg className="text-[#c8e0b0] dark:text-[#2a4e22] shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+
+          <div className="flex items-center gap-3 p-[13px_16px] border-b border-green-900/5 dark:border-green-900/5 last:border-b-0">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base bg-blue-500/12">✉️</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13.5px] font-semibold text-[#1a3312] dark:text-[#d8f0c8] leading-tight mb-0.5">Email</p>
+              <p className="text-[11px] text-[#9ab88a] font-medium">{user?.email}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 p-[13px_16px] border-b border-green-900/5 dark:border-green-900/5 last:border-b-0">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base bg-purple-500/12">📅</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13.5px] font-semibold text-[#1a3312] dark:text-[#d8f0c8] leading-tight mb-0.5">Member Since</p>
+              <p className="text-[11px] text-[#9ab88a] font-medium">
+                {profile?.created_at ? new Date(profile.created_at).toLocaleDateString("en-NG", { month: "long", year: "numeric" }) : "—"}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 p-[13px_16px] border-b border-green-900/5 dark:border-green-900/5 last:border-b-0 cursor-pointer active:bg-green-900/[0.04] dark:active:bg-green-900/[0.08]" onClick={() => setLogoutOpen(true)}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base bg-gray-500/10">🚪</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13.5px] font-semibold text-red-600 dark:text-red-400 leading-tight mb-0.5">Sign Out</p>
+              <p className="text-[11px] text-[#9ab88a] font-medium">Sign out of your account session</p>
+            </div>
+            <svg className="text-[#c8e0b0] dark:text-[#2a4e22] shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+        </div>
+
+        {/* ── About & Support Section ───────────────────────────── */}
+        <div className="bg-white dark:bg-[#111e0f] border border-transparent dark:border-[#1f3319] shadow-xs rounded-[20px] overflow-hidden">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#6a9e5e] p-[13px_16px_8px] border-b border-green-900/5 dark:border-green-900/10">About & Support</p>
+          
+          <div className="flex items-center gap-3 p-[13px_16px] border-b border-green-900/5 dark:border-green-900/5 last:border-b-0 cursor-pointer active:bg-green-900/[0.04] dark:active:bg-green-900/[0.08]" onClick={() => setAboutOpen(true)}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base bg-green-500/12"><GradiaLogo size={22} /></div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13.5px] font-semibold text-[#1a3312] dark:text-[#d8f0c8] leading-tight mb-0.5">Gradia</p>
+              <p className="text-[11px] text-[#9ab88a] font-medium">Post-UTME CBT Prep · UI · UNILAG · OAU</p>
+            </div>
+            <svg className="text-[#c8e0b0] dark:text-[#2a4e22] shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+
+          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-[13px_16px] border-b border-green-900/5 dark:border-green-900/5 last:border-b-0 cursor-pointer active:bg-green-900/[0.04] dark:active:bg-green-900/[0.08] no-underline">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base bg-blue-500/12">💬</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13.5px] font-semibold text-[#1a3312] dark:text-[#d8f0c8] leading-tight mb-0.5">Get in Touch</p>
+              <p className="text-[11px] text-[#9ab88a] font-medium">Chat with support on WhatsApp</p>
+            </div>
+            <svg className="text-[#c8e0b0] dark:text-[#2a4e22] shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+          </a>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center text-xs text-[#b8d4a8] pt-2 pb-0 flex flex-col items-center gap-1 mt-auto">
+                <GradiaLogo size={28} wordmark />
+                <span>v1.0.0 · Made with 💚 for Nigerian students</span>
+        </div>
+
+      </div>
+
+      {/* Modals */}
+      <ProfileModal isOpen={editNameOpen} onClose={() => setEditNameOpen(false)} title="Change Display Name">
+        <div className="pb-1">
+          <p className="text-[12.5px] text-[#5a7e4e] mb-3 leading-relaxed">This name is shown on the leaderboard and throughout the app.</p>
           <input
-            className="name-input"
+            className="w-100 bg-[#f0f8eb] dark:bg-[#1a2e17] border border-[#c8e0b8] dark:border-[#243d1e] rounded-xl p-[13px_16px] text-base text-[#1a3312] dark:text-[#e8f5e4] outline-none focus:border-[#5a9e48] transition-all"
             type="text"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
@@ -560,63 +313,43 @@ export default function ProfilePage() {
             onKeyDown={(e) => e.key === "Enter" && saveDisplayName()}
             autoFocus
           />
-          {nameError && (
-            <p style={{ fontSize: 12, color: "#dc2626", marginTop: 8 }}>⚠ {nameError}</p>
-          )}
-          <p style={{ fontSize: 11, color: "#9ab88a", marginTop: 6 }}>
-            {newName.length} / 30 characters
-          </p>
-        </div>
-      </Modal>
-
-      {/* ── Logout Confirm ────────────────────────────────────────── */}
-      <Modal
-        isOpen={logoutOpen}
-        onClose={() => setLogoutOpen(false)}
-        title="Log Out?"
-        size="sm"
-        footer={
-          <>
-            <Button variant="ghost" size="sm" onClick={() => setLogoutOpen(false)}>Stay</Button>
-            <Button variant="secondary" size="md" loading={logoutLoading} onClick={handleLogout}>
-              Log Out
-            </Button>
-          </>
-        }
-      >
-        <p style={{ fontSize: 13, color: "#5a7e4e", lineHeight: 1.6, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-          You'll be signed out of your Gradia account. Your progress and results are saved safely.
-        </p>
-      </Modal>
-
-      {/* ── Delete Account Confirm ────────────────────────────────── */}
-      <Modal
-        isOpen={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        title="Delete Account?"
-        size="sm"
-        footer={
-          <>
-            <Button variant="ghost" size="sm" onClick={() => setDeleteOpen(false)}>Cancel</Button>
-            <Button variant="danger" size="md" onClick={() => setDeleteOpen(false)}>
-              Delete Forever
-            </Button>
-          </>
-        }
-      >
-        <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-          <p style={{ fontSize: 13, color: "#5a7e4e", lineHeight: 1.6, marginBottom: 12 }}>
-            This will permanently delete your account, all test results, and your leaderboard history. <strong style={{ color: "#dc2626" }}>This cannot be undone.</strong>
-          </p>
-          <div style={{ background: "#fff5f5", border: "1px solid #fca5a5", borderRadius: 12, padding: "10px 13px", display: "flex", gap: 9 }}>
-            <span style={{ fontSize: 18, flexShrink: 0 }}>⚠️</span>
-            <p style={{ fontSize: 12, color: "#7f1d1d", lineHeight: 1.5 }}>
-              Contact support if you just want to reset your progress instead.
-            </p>
+          {nameError && <p className="text-xs text-red-600 mt-2">⚠ {nameError}</p>}
+          <p className="text-[11px] text-[#9ab88a] mt-1.5">{newName.length} / 30 characters</p>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="ghost" size="sm" onClick={() => setEditNameOpen(false)}>Cancel</Button>
+            <Button size="md" loading={nameLoading} onClick={saveDisplayName}>Save</Button>
           </div>
         </div>
-      </Modal>
+      </ProfileModal>
+
+      <ProfileModal isOpen={logoutOpen} onClose={() => setLogoutOpen(false)} title="Log Out?">
+        <div>
+          <p className="text-sm text-[#5a7e4e] leading-relaxed mb-5">You'll be signed out of your Gradia account. Your progress and results are saved safely.</p>
+          <div className="flex gap-3">
+            <Button variant="ghost" size="sm" fullWidth onClick={() => setLogoutOpen(false)}>Stay</Button>
+            <Button variant="secondary" size="md" fullWidth loading={logoutLoading} onClick={handleLogout}>Log Out</Button>
+          </div>
+        </div>
+      </ProfileModal>
+
+      <ProfileModal isOpen={premiumGateOpen} onClose={() => setPremiumGateOpen(false)} title="Premium Feature">
+        <div className="text-center py-2.5">
+          <p className="text-3xl text-center mb-3">🔒</p>
+          <p className="text-sm text-[#5a7e4e] leading-relaxed mb-5">Changing your target institution is restricted to premium members. Upgrade your plan to swap options across UI, UNILAG, and OAU freely.</p>
+          <Button fullWidth onClick={() => setPremiumGateOpen(false)}>Got it</Button>
+        </div>
+      </ProfileModal>
+
+      <ProfileModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} title="About Gradia">
+        <div className="flex flex-col items-center text-center">
+          <div className="my-3"><GradiaLogo size={44} /></div>
+          <p className="text-sm font-semibold text-[#1a3312] mb-2">Gradia Post-UTME Practice App</p>
+          <p className="text-[12.5px] text-[#5a7e4e] leading-relaxed mb-6 max-w-[320px]">Gradia is a tailored computer-based testing dashboard designed for prospective candidates seeking admissions into UI, UNILAG, and OAU. Practice with real exam time limits, view explanations, and climb the leaderboard.</p>
+          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="w-full no-underline"><Button fullWidth>💬 Contact Developer</Button></a>
+        </div>
+      </ProfileModal>
+
       <BottomNav />
-    </>
+    </div>
   );
 }

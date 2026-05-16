@@ -5,6 +5,7 @@ import {createRoot} from "react-dom/client";
 import { BrowserRouter } from "react-router";
 import { StrictMode } from "react";
 import App from './App.jsx'
+import { ThemeProvider } from "./context/ThemeContext.jsx";
 import './index.css'
 
 createRoot(document.getElementById('root')).render(
@@ -12,7 +13,9 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
     <AuthProvider>
         <SchoolProvider>
-            <App />
+          <ThemeProvider>
+                        <App />
+          </ThemeProvider>
         </SchoolProvider>
     </AuthProvider>
     </BrowserRouter>

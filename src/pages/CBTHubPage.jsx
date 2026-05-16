@@ -6,7 +6,7 @@ import Button from "../components/ui/Button";
 import Modal from "../components/ui/Modal";
 import BottomNav from "../components/ui/BottomNav";
 import { HiLightningBolt, HiBookOpen, HiCheckCircle } from "react-icons/hi";
-// ── Hardcoded Data ──────────────────────────────────────────────
+
 const SUBJECTS_BY_SCHOOL = {
   UI: [
     "aptitude", "Mathematics", "Biology", "Chemistry",
@@ -64,8 +64,8 @@ export default function CBTHubPage() {
     
     if (incomingMode === "study") {
       if (!isPremium) {
-        setMode("test"); // Force back to test
-        setShowPremiumGate(true); // Trigger modal immediately
+        setMode("test"); 
+        setShowPremiumGate(true); 
       } else {
         setMode("study");
       }
