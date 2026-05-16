@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react"; // Added useEffect
+import { useContext, useState, useEffect } from "react"; 
 import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { SchoolContext } from "../context/SchoolContext";
@@ -54,11 +54,19 @@ export default function CBTHubPage() {
   // Initial state setup
   const [mode, setMode] = useState("test"); 
   const [selectedSubjects, setSelectedSubjects] = useState([]);
-  const [duration, setDuration] = useState(3600);
-  const [questionCount, setQuestionCount] = useState(40);
+  const [duration, setDuration] = useState(1200); // Defaulting to 20m for a 20 Qs standard
+  const [questionCount, setQuestionCount] = useState(20); // Default to 20 for optimal free entry
   const [showPremiumGate, setShowPremiumGate] = useState(false);
 
-  // ── 2. Incoming Mode Check ────────────────────────────────────
+  // Fallback state check if user is loaded as free but had an out-of-bounds question count set
+  useEffect(() => {
+    if (!isPremium && questionCount !== 20) {
+      setQuestionCount(20);
+      setDuration(1200); // Sync to 20 minutes
+    }
+  }, [isPremium, questionCount]);
+
+  // ── Incoming Mode Check ────────────────────────────────────
   useEffect(() => {
     const incomingMode = location.state?.mode;
     
@@ -79,7 +87,7 @@ export default function CBTHubPage() {
   function toggleSubject(sub) {
     setSelectedSubjects((prev) => {
       if (prev.includes(sub)) return prev.filter((s) => s !== sub);
-      if (prev.length >= 4) return prev; // Logical block
+      if (prev.length >= 4) return prev; 
       return [...prev, sub];
     });
   }
@@ -92,15 +100,34 @@ export default function CBTHubPage() {
     setMode(m);
   }
 
+  function handleQuestionSelect(count) {
+    if (!isPremium && count !== 20) {
+      setShowPremiumGate(true);
+      return;
+    }
+    setQuestionCount(count);
+    
+    // Auto-adjust time nicely based on question count values chosen
+    if (count === 20) setDuration(1200);
+    else if (count === 40) setDuration(2400);
+    else setDuration(3600);
+  }
+
   function handleStart() {
     if (!canStart) return;
     navigate("/cbt/session", {
-      state: { mode, subjects: selectedSubjects, school: selectedSchool, durationSeconds: mode === "test" ? duration : null, questionCount },
+      state: { 
+        mode, 
+        subjects: selectedSubjects, 
+        school: selectedSchool, 
+        durationSeconds: mode === "test" ? duration : null, 
+        questionCount 
+      },
     });
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f9f2] dark:bg-[#0b160a] font-sans pb-32">
+    <div className="min-h-screen bg-[#f5f9f2] dark:bg-[#0b160a] font-sans pb-40">
       
       {/* Header */}
       <header className="sticky top-0 z-30 bg-white/80 dark:bg-[#0d1a0c]/80 backdrop-blur-md border-b border-green-900/5 px-4 pt-4 pb-3">
@@ -136,7 +163,7 @@ export default function CBTHubPage() {
           </div>
         </section>
 
-        {/* ── 1. Subjects Grid (Fixed Styling) ─────────────────────── */}
+        {/* Subjects Grid */}
         <section className="space-y-3">
           <div className="flex justify-between items-end px-1">
             <label className="text-[11px] font-black text-[#6a9e5e] uppercase tracking-widest">Subjects</label>
@@ -153,14 +180,11 @@ export default function CBTHubPage() {
                 <button
                   key={sub}
                   onClick={() => toggleSubject(sub)}
-                  // We remove 'disabled' so it doesn't look grayed out, 
-                  // toggleSubject logic handles the actual click blocking.
                   className={`flex items-center gap-3 p-3 rounded-2xl border transition-all text-left active:scale-95 ${
-                  isSelected 
-                    ? "bg-green-500 border-green-600 shadow-md translate-y-[-1px]" 
-                    : "bg-white dark:bg-[#111e0f] border-green-900/10 dark:border-[#1f3319]"
-                } ${isLimitReached ? "opacity-40 cursor-not-allowed" : "opacity-100"}`}
-                  
+                    isSelected 
+                      ? "bg-green-500 border-green-600 shadow-md translate-y-[-1px]" 
+                      : "bg-white dark:bg-[#111e0f] border-green-900/10 dark:border-[#1f3319]"
+                  } ${isLimitReached ? "opacity-40 cursor-not-allowed" : "opacity-100"}`}
                 >
                   <span className="text-lg">{SUBJECT_EMOJIS[sub] || "📚"}</span>
                   <span className={`text-xs font-bold flex-1 leading-tight ${isSelected ? "text-white" : "text-[#1a3312] dark:text-[#d8f0c8]"}`}>
@@ -181,40 +205,68 @@ export default function CBTHubPage() {
           <section className="space-y-3">
             <label className="text-[11px] font-black text-[#6a9e5e] uppercase tracking-widest ml-1">Questions</label>
             <div className="flex flex-wrap gap-2">
-              {QUESTION_OPTIONS.map(q => (
-                <Pill key={q} active={questionCount === q} onClick={() => setQuestionCount(q)} label={`${q} Qs`} />
-              ))}
+              {QUESTION_OPTIONS.map(q => {
+                const isLockedOption = !isPremium && q !== 20;
+                return (
+                  <Pill 
+                    key={q} 
+                    active={questionCount === q} 
+                    onClick={() => handleQuestionSelect(q)} 
+                    label={isLockedOption ? `${q} Qs 🔒` : `${q} Qs`} 
+                    disabled={isLockedOption}
+                  />
+                );
+              })}
             </div>
+            {!isPremium && (
+              <p className="text-[10px] font-bold text-[#6a9e5e]/80 dark:text-[#9ab88a]/50 italic ml-1 mt-1.5">
+                💡 Free Tier: Limited to 20-question  . Shuffling and higher volumes require activation.
+              </p>
+            )}
           </section>
 
           {mode === 'test' && (
             <section className="space-y-3">
               <label className="text-[11px] font-black text-[#6a9e5e] uppercase tracking-widest ml-1">Time Limit</label>
               <div className="flex flex-wrap gap-2">
-                {DURATION_OPTIONS.map(d => (
-                  <Pill key={d.value} active={duration === d.value} onClick={() => setDuration(d.value)} label={d.label} />
-                ))}
+                {DURATION_OPTIONS.map(d => {
+                  // Disable massive lengths if limited to 20 Qs on free tier to look realistic
+                  const isDurationDisabled = !isPremium && d.value > 2400;
+                  return (
+                    <Pill 
+                      key={d.value} 
+                      active={duration === d.value} 
+                      onClick={() => !isDurationDisabled && setDuration(d.value)} 
+                      label={d.label} 
+                      disabled={isDurationDisabled}
+                    />
+                  );
+                })}
               </div>
             </section>
           )}
         </div>
       </main>
 
-      {/* Sticky Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 dark:bg-[#0b160a]/80 backdrop-blur-xl border-t border-green-900/10 pb-24">
+      {/* Sticky Footer adjusted above bottom navigation tier */}
+      <footer className="fixed bottom-[65px] left-0 right-0 p-4 bg-white/90 dark:bg-[#0b160a]/90 backdrop-blur-xl border-t border-green-900/10 z-40 shadow-lg">
         <div className="max-w-2xl mx-auto flex items-center gap-4">
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-black text-[#9ab88a] uppercase tracking-tighter">Ready to start?</p>
+            <p className="text-[10px] font-black text-[#6a9e5e] uppercase tracking-tighter">Ready to start?</p>
             <p className="text-xs font-bold text-[#1a3312] dark:text-white truncate">
               {selectedSubjects.length > 0 ? selectedSubjects.join(", ") : "Select subjects..."}
             </p>
           </div>
-          <Button onClick={handleStart} disabled={!canStart} size="lg" className="px-8 shadow-xl shadow-green-900/20">
+          <Button 
+            onClick={handleStart} 
+            disabled={!canStart} 
+            size="lg" 
+            className={`px-8 shadow-xl transition-all duration-200 ${canStart ? "opacity-100 shadow-green-900/20" : "opacity-40 cursor-not-allowed"}`}
+          >
             START SESSION
           </Button>
         </div>
       </footer>
-
 
       <BottomNav />
 
@@ -222,16 +274,14 @@ export default function CBTHubPage() {
       <Modal isOpen={showPremiumGate} onClose={() => setShowPremiumGate(false)}>
         <div className="text-center py-4">
           <div className="text-5xl mb-4">🔐</div>
-          <h2 className="text-xl font-black text-[#1a3312] dark:text-white font-serif mb-2">Study Mode is Premium</h2>
+          <h2 className="text-xl font-black text-[#1a3312] dark:text-white font-serif mb-2">Premium Feature Locked</h2>
           <p className="text-sm text-green-800/60 dark:text-green-200/60 mb-6 px-4">
-            Unlock instant explanations, answer reveals, and unlimited study power with a one-time activation.
+            Unlock Study Mode explanations, advanced question sizes up to 100 entries, and complete dynamic shuffles with a one-time activation.
           </p>
           <Button className="w-full" onClick={() => setShowPremiumGate(false)}>Upgrade to Unlock</Button>
         </div>
       </Modal>
     </div>
-
-
   );
 }
 
@@ -255,7 +305,6 @@ function ModeCard({ active, onClick, title, desc, icon, color, locked }) {
       }`}>
         {icon}
       </div>
-      {/* Added conditional text-black classes below when active is true */}
       <p className={`text-sm font-black ${active ? "text-black" : "text-[#1a3312] dark:text-white"}`}>
         {title}
       </p>
@@ -267,14 +316,16 @@ function ModeCard({ active, onClick, title, desc, icon, color, locked }) {
   );
 }
 
-function Pill({ active, label, onClick }) {
+function Pill({ active, label, onClick, disabled }) {
   return (
     <button 
       onClick={onClick}
       className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all ${
         active 
         ? "bg-[#3d7830] text-white shadow-lg" 
-        : "bg-white dark:bg-[#111e0f] border border-green-900/10 dark:border-[#1f3319] text-[#1a3312] dark:text-[#d8f0c8]"
+        : disabled
+          ? "bg-gray-100 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 cursor-pointer"
+          : "bg-white dark:bg-[#111e0f] border border-green-900/10 dark:border-[#1f3319] text-[#1a3312] dark:text-[#d8f0c8]"
       }`}
     >
       {label}
