@@ -6,7 +6,7 @@ import { ThemeContext } from "../context/ThemeContext";
 import { supabase } from "../lib/supabaseClient";
 import GradiaLogo from "../components/ui/logo";
 import Button from "../components/ui/Button";
-import ProfileModal from "../components/ui/ProfileModal";
+import ProfileModal from "../components/ui/profileModal";
 import BottomNav from "../components/ui/BottomNav";
 
 const SCHOOLS = [
