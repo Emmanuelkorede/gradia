@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { SchoolContext } from "../context/SchoolContext";
 import { supabase } from "../lib/supabaseClient";
-import ProfileModal from "../components/ui/ProfileModal";
+import ProfileModal from "../components/ui/profileModal";
 import BottomNav from "../components/ui/BottomNav";
 import { HiHeart, HiOutlineHeart, HiShare, HiChevronLeft, HiInbox, HiOutlineBell } from "react-icons/hi";
 
