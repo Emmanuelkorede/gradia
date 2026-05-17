@@ -1,10 +1,10 @@
-import { usePaystack } from "../../hooks/usePaystack";
+import { useNavigate } from "react-router"; // Added router navigation
 import { useAuth } from "../../hooks/useAuth";
 import { HiCheckCircle, HiLockClosed, HiShieldCheck } from "react-icons/hi";
 
 export default function ActivationCard() {
   const { isPremium } = useAuth();
-  const { pay, paying, paid, error } = usePaystack();
+  const navigate = useNavigate(); // Hook initializer
 
   if (isPremium) return null;
 
@@ -53,27 +53,19 @@ export default function ActivationCard() {
           <span className="text-[10px] font-bold text-[#7ac86a] uppercase">Lifetime access</span>
         </div>
 
-        {/* Feedback Messages */}
-        {error && (
-          <div className="mb-3 p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-[10px] font-bold text-red-200">
-            ⚠️ {error}
-          </div>
-        )}
-
         {/* Main CTA */}
         <button
-          onClick={pay}
-          disabled={paying || paid}
-          className="w-full rounded-xl bg-white py-3 text-center text-xs font-black text-[#1a3312] shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
+          onClick={() => navigate("/premium")}
+          className="w-full rounded-xl bg-white py-3 text-center text-xs font-black text-[#1a3312] shadow-lg transition-all active:scale-[0.98]"
         >
-          {paying ? "Opening Paystack..." : paid ? "Activating..." : "ACTIVATE NOW"}
+          ACTIVATE NOW
         </button>
 
         {/* Security Trust Link */}
         <div className="mt-3 flex items-center justify-center gap-1.5 opacity-50">
           <HiShieldCheck className="text-xs text-[#7ac86a]" />
           <span className="text-[9px] font-bold tracking-widest text-[#8aae7a] uppercase">
-            Secured by Paystack
+            Secured checkout activation
           </span>
         </div>
       </div>

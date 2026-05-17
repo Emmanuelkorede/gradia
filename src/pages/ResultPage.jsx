@@ -4,14 +4,12 @@ import { useAuth } from "../hooks/useAuth";
 import CorrectionBox from "../components/cbt/CorrectionBox";
 import Button from "../components/ui/Button";
 
-
-
 function getGrade(pct) {
   if (pct >= 80) return { label: "Excellent",  color: "#16a34a", emoji: "🏆" };
   if (pct >= 65) return { label: "Good",        color: "#3b82f6", emoji: "👍" };
   if (pct >= 50) return { label: "Average",     color: "#f59e0b", emoji: "📈" };
   if (pct >= 40) return { label: "Below Avg",   color: "#f97316", emoji: "📚" };
-  return               { label: "Needs Work",   color: "#ef4444", emoji: "💪" };
+  return                { label: "Needs Work",   color: "#ef4444", emoji: "💪" };
 }
 
 function getMotiMessage(pct) {
@@ -227,7 +225,7 @@ export default function ResultPage() {
                 <div className="text-[28px] mb-1.5">🔐</div>
                 <p className="font-serif text-lg font-bold text-[#1a3312] dark:text-[#d8f0c8] mb-1">Explanations are Premium</p>
                 <p className="text-[12.5px] text-[#5a7e4e] leading-relaxed mb-3.5">Upgrade to see why each answer is correct — the fastest way to actually improve your score.</p>
-                <Button fullWidth>Unlock Explanations — ₦2,500</Button>
+                <Button onClick={() => navigate("/premium")} fullWidth>Unlock Explanations — ₦2,000</Button>
               </div>
             )}
 

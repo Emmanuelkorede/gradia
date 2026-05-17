@@ -51,22 +51,19 @@ export default function CBTHubPage() {
 
   const availableSubjects = SUBJECTS_BY_SCHOOL[selectedSchool] || SUBJECTS_BY_SCHOOL.UI;
 
-  // Initial state setup
   const [mode, setMode] = useState("test"); 
   const [selectedSubjects, setSelectedSubjects] = useState([]);
-  const [duration, setDuration] = useState(1200); // Defaulting to 20m for a 20 Qs standard
-  const [questionCount, setQuestionCount] = useState(20); // Default to 20 for optimal free entry
+  const [duration, setDuration] = useState(1200); 
+  const [questionCount, setQuestionCount] = useState(20); 
   const [showPremiumGate, setShowPremiumGate] = useState(false);
 
-  // Fallback state check if user is loaded as free but had an out-of-bounds question count set
   useEffect(() => {
     if (!isPremium && questionCount !== 20) {
       setQuestionCount(20);
-      setDuration(1200); // Sync to 20 minutes
+      setDuration(1200); 
     }
   }, [isPremium, questionCount]);
 
-  // ── Incoming Mode Check ────────────────────────────────────
   useEffect(() => {
     const incomingMode = location.state?.mode;
     
@@ -107,7 +104,6 @@ export default function CBTHubPage() {
     }
     setQuestionCount(count);
     
-    // Auto-adjust time nicely based on question count values chosen
     if (count === 20) setDuration(1200);
     else if (count === 40) setDuration(2400);
     else setDuration(3600);
@@ -220,7 +216,7 @@ export default function CBTHubPage() {
             </div>
             {!isPremium && (
               <p className="text-[10px] font-bold text-[#6a9e5e]/80 dark:text-[#9ab88a]/50 italic ml-1 mt-1.5">
-                💡 Free Tier: Limited to 20-question  . Shuffling and higher volumes require activation.
+                💡 Free Tier: Limited to 20-question. Shuffling and higher volumes require activation.
               </p>
             )}
           </section>
@@ -230,7 +226,6 @@ export default function CBTHubPage() {
               <label className="text-[11px] font-black text-[#6a9e5e] uppercase tracking-widest ml-1">Time Limit</label>
               <div className="flex flex-wrap gap-2">
                 {DURATION_OPTIONS.map(d => {
-                  // Disable massive lengths if limited to 20 Qs on free tier to look realistic
                   const isDurationDisabled = !isPremium && d.value > 2400;
                   return (
                     <Pill 
@@ -248,7 +243,7 @@ export default function CBTHubPage() {
         </div>
       </main>
 
-      {/* Sticky Footer adjusted above bottom navigation tier */}
+      {/* Sticky Footer */}
       <footer className="fixed bottom-[65px] left-0 right-0 p-4 bg-white/90 dark:bg-[#0b160a]/90 backdrop-blur-xl border-t border-green-900/10 z-40 shadow-lg">
         <div className="max-w-2xl mx-auto flex items-center gap-4">
           <div className="flex-1 min-w-0">
@@ -276,9 +271,11 @@ export default function CBTHubPage() {
           <div className="text-5xl mb-4">🔐</div>
           <h2 className="text-xl font-black text-[#1a3312] dark:text-white font-serif mb-2">Premium Feature Locked</h2>
           <p className="text-sm text-green-800/60 dark:text-green-200/60 mb-6 px-4">
-            Unlock Study Mode explanations, advanced question sizes up to 100 entries, and complete dynamic shuffles with a one-time activation.
+            Unlock Study Mode explanations, advanced question sizes up to 100 entries, and complete dynamic shuffles with a lifetime activation for just ₦2,000.
           </p>
-          <Button className="w-full" onClick={() => setShowPremiumGate(false)}>Upgrade to Unlock</Button>
+          <Button className="w-full" onClick={() => { setShowPremiumGate(false); navigate("/premium"); }}>
+            Upgrade to Unlock
+          </Button>
         </div>
       </Modal>
     </div>

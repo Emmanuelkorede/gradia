@@ -1,4 +1,5 @@
 import { useContext, useState } from "react";
+import { useNavigate } from "react-router"; // Added router navigation
 import { useAuth } from "../hooks/useAuth";
 import { useLeaderboard } from "../hooks/useLeaderboard";
 import { SchoolContext } from "../context/SchoolContext";
@@ -100,6 +101,8 @@ function Podium({ topThree }) {
 }
 
 function LockOverlay() {
+  const navigate = useNavigate();
+
   return (
     <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#f5f9f2] via-[#f5f9f2]/85 to-transparent flex items-end justify-center pb-6">
       <div className="bg-white rounded-[20px] p-[20px_22px] text-center shadow-2xl shadow-green-900/12 border-[1.5px] border-green-900/15 max-w-[300px]">
@@ -110,7 +113,7 @@ function LockOverlay() {
         <p className="text-xs text-[#5a7e4e] leading-relaxed mb-3.5">
           Compete with students from your school and claim your spot in the top 10.
         </p>
-        <Button fullWidth>Unlock — ₦2,500</Button>
+        <Button fullWidth onClick={() => navigate("/premium")}>Unlock — ₦2,000</Button>
       </div>
     </div>
   );

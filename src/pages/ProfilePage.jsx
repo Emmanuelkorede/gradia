@@ -190,8 +190,11 @@ export default function ProfilePage() {
               <p className="font-serif text-[15px] font-black text-white mb-0.5">Unlock Gradia Premium</p>
               <p className="text-[11px] text-white/70 leading-normal">Study mode, leaderboard & explanations</p>
             </div>
-            <button className="bg-white text-[#3d7830] border-none rounded-xl p-[9px_14px] font-sans text-xs font-bold whitespace-nowrap active:scale-95 transition-transform">
-              ₦2,500
+            <button 
+              onClick={() => navigate("/premium")} 
+              className="bg-white text-[#3d7830] border-none rounded-xl p-[9px_14px] font-sans text-xs font-bold whitespace-nowrap active:scale-95 transition-transform"
+            >
+              ₦2,000
             </button>
           </div>
         )}
@@ -350,72 +353,69 @@ export default function ProfilePage() {
 
         {/* Footer */}
         <div className="text-center text-xs text-[#b8d4a8] pt-2 pb-0 flex flex-col items-center gap-1 mt-auto">
-                <GradiaLogo size={28} wordmark />
-                <span>v1.0.0 · Made with 💚 for Nigerian students</span>
+          <GradiaLogo size={28} wordmark />
+          <span>v1.0.0 · Made with 💚 for Nigerian students</span>
         </div>
 
       </div>
 
       {/* Modals */}
       
-      {/* Interactive Feedback Modal Form */}
-      
-{/* Interactive Feedback Modal Form (Space-Saving Version) */}
-<ProfileModal isOpen={feedbackOpen} onClose={() => setFeedbackOpen(false)} title="Submit Feedback">
-  <div className="pb-2">
-    {fbSuccess ? (
-      <div className="text-center py-6">
-        <span className="text-3xl">🚀</span>
-        <p className="text-sm font-bold text-[#1a3312] dark:text-[#d8f0c8] mt-2">Feedback Sent!</p>
-        <p className="text-xs text-[#5a7e4e]">Thank you for helping us make Gradia better.</p>
-      </div>
-    ) : (
-      <>
-        {/* Category Dropdown (Saves lots of vertical space) */}
-        <div className="mb-3">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-[#6a9e5e] block mb-1">Category</label>
-          <select
-            value={fbCategory}
-            onChange={(e) => setFbCategory(e.target.value)}
-            className="w-full bg-[#f0f8eb] dark:bg-[#1a2e17] border border-[#c8e0b8] dark:border-[#243d1e] rounded-xl p-2 text-xs font-bold text-[#1a3312] dark:text-[#e8f5e4] outline-none focus:border-[#5a9e48]"
-          >
-            {['Suggestion', 'Bug', 'Question', 'Other'].map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Message Entry Area */}
-        <div className="mb-2">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-[#6a9e5e] block mb-1">Your Message</label>
-          <textarea
-            className="w-full bg-[#f0f8eb] dark:bg-[#1a2e17] border border-[#c8e0b8] dark:border-[#243d1e] rounded-xl p-2.5 text-xs text-[#1a3312] dark:text-[#e8f5e4] outline-none focus:border-[#5a9e48] min-h-[70px] resize-none"
-            value={fbMessage}
-            onChange={(e) => setFbMessage(e.target.value)}
-            placeholder="Type details here..."
-            maxLength={1000}
-          />
-        </div>
-
-        <div className="flex items-center justify-between mt-1 mb-3">
-          {fbError ? (
-            <p className="text-[11px] text-red-600">⚠ {fbError}</p>
+      {/* Interactive Feedback Modal Form (Space-Saving Version) */}
+      <ProfileModal isOpen={feedbackOpen} onClose={() => setFeedbackOpen(false)} title="Submit Feedback">
+        <div className="pb-2">
+          {fbSuccess ? (
+            <div className="text-center py-6">
+              <span className="text-3xl">🚀</span>
+              <p className="text-sm font-bold text-[#1a3312] dark:text-[#d8f0c8] mt-2">Feedback Sent!</p>
+              <p className="text-xs text-[#5a7e4e]">Thank you for helping us make Gradia better.</p>
+            </div>
           ) : (
-            <div />
+            <>
+              {/* Category Dropdown (Saves lots of vertical space) */}
+              <div className="mb-3">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#6a9e5e] block mb-1">Category</label>
+                <select
+                  value={fbCategory}
+                  onChange={(e) => setFbCategory(e.target.value)}
+                  className="w-full bg-[#f0f8eb] dark:bg-[#1a2e17] border border-[#c8e0b8] dark:border-[#243d1e] rounded-xl p-2 text-xs font-bold text-[#1a3312] dark:text-[#e8f5e4] outline-none focus:border-[#5a9e48]"
+                >
+                  {['Suggestion', 'Bug', 'Question', 'Other'].map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Message Entry Area */}
+              <div className="mb-2">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-[#6a9e5e] block mb-1">Your Message</label>
+                <textarea
+                  className="w-full bg-[#f0f8eb] dark:bg-[#1a2e17] border border-[#c8e0b8] dark:border-[#243d1e] rounded-xl p-2.5 text-xs text-[#1a3312] dark:text-[#e8f5e4] outline-none focus:border-[#5a9e48] min-h-[70px] resize-none"
+                  value={fbMessage}
+                  onChange={(e) => setFbMessage(e.target.value)}
+                  placeholder="Type details here..."
+                  maxLength={1000}
+                />
+              </div>
+
+              <div className="flex items-center justify-between mt-1 mb-3">
+                {fbError ? (
+                  <p className="text-[11px] text-red-600">⚠ {fbError}</p>
+                ) : (
+                  <div />
+                )}
+                <p className="text-[10px] text-[#9ab88a]">{fbMessage.length} / 1000</p>
+              </div>
+
+              {/* Form Action Submit Triggers */}
+              <div className="flex justify-end gap-2 border-t border-green-900/5 pt-3">
+                <Button variant="ghost" size="sm" onClick={() => setFeedbackOpen(false)}>Cancel</Button>
+                <Button size="md" loading={fbLoading} onClick={submitFeedback}>Submit</Button>
+              </div>
+            </>
           )}
-          <p className="text-[10px] text-[#9ab88a]">{fbMessage.length} / 1000</p>
         </div>
-
-        {/* Form Action Submit Triggers */}
-        <div className="flex justify-end gap-2 border-t border-green-900/5 pt-3">
-          <Button variant="ghost" size="sm" onClick={() => setFeedbackOpen(false)}>Cancel</Button>
-          <Button size="md" loading={fbLoading} onClick={submitFeedback}>Submit</Button>
-        </div>
-      </>
-    )}
-  </div>
-</ProfileModal>
-
+      </ProfileModal>
 
       <ProfileModal isOpen={editNameOpen} onClose={() => setEditNameOpen(false)} title="Change Display Name">
         <div className="pb-1">

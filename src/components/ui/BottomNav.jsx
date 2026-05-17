@@ -1,12 +1,15 @@
 import { useLocation, useNavigate } from "react-router";
+import { useAuth } from "../../hooks/useAuth"; 
 import { 
   HiHome, HiOutlineHome, 
   HiClipboardCheck, HiOutlineClipboardCheck, 
   HiChartBar, HiOutlineChartBar, 
-  HiUser, HiOutlineUser 
+  HiUser, HiOutlineUser,
+  HiShieldCheck, HiOutlineShieldCheck 
 } from "react-icons/hi";
 
-const TABS = [
+// Default tabs visible to all users
+const BASE_TABS = [
   { id: "home", label: "Home", path: "/home", IconActive: HiHome, IconOutline: HiOutlineHome },
   { id: "cbt", label: "CBT Hub", path: "/cbt", IconActive: HiClipboardCheck, IconOutline: HiOutlineClipboardCheck },
   { id: "leaderboard", label: "Ranks", path: "/leaderboard", IconActive: HiChartBar, IconOutline: HiOutlineChartBar },
@@ -16,8 +19,21 @@ const TABS = [
 export default function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { profile } = useAuth(); // Accessing user profile data
 
-  const hiddenPaths = ["/", "/auth", "/onboarding", "/cbt/session", "/admin"];
+  // Dynamically inject the Admin tab if user role matches
+  const activeTabs = [...BASE_TABS];
+  if (profile?.role === "admin") {
+    activeTabs.push({
+      id: "admin",
+      label: "Admin",
+      path: "/admin",
+      IconActive: HiShieldCheck,
+      IconOutline: HiOutlineShieldCheck,
+    });
+  }
+
+  const hiddenPaths = ["/", "/auth", "/onboarding", "/cbt/session"];
   const isHidden = hiddenPaths.some((p) =>
     p === "/cbt/session" ? location.pathname.startsWith("/cbt/session") : location.pathname === p
   );
@@ -27,9 +43,8 @@ export default function BottomNav() {
   return (
     <>
       <nav className="fixed bottom-0 left-0 right-0 z-[100] bg-white/80 dark:bg-[#0d1a0c]/90 backdrop-blur-xl border-t border-green-900/5 dark:border-[#1f3319] pb-[env(safe-area-inset-bottom,0px)] shadow-2xl">
-        {/* Removed max-w-md for desktop so it spreads, kept it centered for mobile feel */}
         <div className="flex items-center justify-around w-full max-w-6xl mx-auto h-18 px-4">
-          {TABS.map((tab) => {
+          {activeTabs.map((tab) => {
             const isActive = location.pathname === tab.path || (tab.path !== "/home" && location.pathname.startsWith(tab.path));
             const Icon = isActive ? tab.IconActive : tab.IconOutline;
 
@@ -43,7 +58,9 @@ export default function BottomNav() {
                 <div className={`
                   absolute inset-x-2 inset-y-1 rounded-2xl transition-all duration-300 ease-out
                   ${isActive 
-                    ? "bg-[#5a9e48]/10 dark:bg-[#5a9e48]/20 scale-100 opacity-100" 
+                    ? tab.id === "admin"
+                      ? "bg-red-500/10 dark:bg-red-500/20 scale-100 opacity-100" // Custom alert background styling for Admin tab
+                      : "bg-[#5a9e48]/10 dark:bg-[#5a9e48]/20 scale-100 opacity-100" 
                     : "bg-gray-100 dark:bg-white/5 scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-95"
                   }
                 `} />
@@ -52,14 +69,21 @@ export default function BottomNav() {
                   <Icon className={`
                     text-2xl transition-all duration-300
                     ${isActive 
-                      ? "text-[#4a8c38] dark:text-[#7ac86a] scale-110" 
+                      ? tab.id === "admin"
+                        ? "text-red-600 dark:text-red-400 scale-110" // Distinct Crimson/Red branding for active Admin state
+                        : "text-[#4a8c38] dark:text-[#7ac86a] scale-110" 
                       : "text-[#9ab88a] dark:text-[#3e5e38] group-hover:text-[#5a9e48]"
                     }
                   `} />
                   
                   <span className={`
                     text-[10px] font-black tracking-widest transition-colors duration-300
-                    ${isActive ? "text-[#3d7830] dark:text-[#7ac86a]" : "text-[#9ab88a] dark:text-[#3e5e38]"}
+                    ${isActive 
+                      ? tab.id === "admin" 
+                        ? "text-red-700 dark:text-red-400" 
+                        : "text-[#3d7830] dark:text-[#7ac86a]" 
+                      : "text-[#9ab88a] dark:text-[#3e5e38]"
+                    }
                   `}>
                     {tab.label.toUpperCase()}
                   </span>
@@ -67,7 +91,11 @@ export default function BottomNav() {
 
                 {/* Subtle active glow light */}
                 {isActive && (
-                  <div className="absolute -bottom-1 w-1 h-1 bg-[#5a9e48] rounded-full shadow-[0_0_8px_#5a9e48]" />
+                  <div className={`absolute -bottom-1 w-1 h-1 rounded-full shadow-sm ${
+                    tab.id === "admin" 
+                      ? "bg-red-500 shadow-red-500" 
+                      : "bg-[#5a9e48] shadow-[#5a9e48]"
+                  }`} />
                 )}
               </button>
             );

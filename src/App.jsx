@@ -10,6 +10,11 @@ import ProfilePage from "./pages/ProfilePage"
 import ResultPage from "./pages/ResultPage"
 import NotificationPage from "./pages/NotificationPage";
 import PremiumPage from "./pages/PremiumPage";
+import AdminRoute from "./components/admin/adminRoute"
+import AdminDashboard from "./pages/admin/AdminDashboard"
+import AdminNews from "./pages/admin/AdminNews" ;
+import AdminPremium from "./pages/admin/adminpremuim";
+import AdminUpload from "./pages/admin/AdminUpload";
 
 export default function App() {
   return (
@@ -26,8 +31,44 @@ export default function App() {
             <Route path="/notifications" element={<NotificationPage />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/onboarding" element={<OnboardingPage />} />
-              <Route path="/premuim" element={<PremiumPage />} />
-          </Routes>
+              <Route path="/premium" element={<PremiumPage />} />
+
+              <Route  path="/admin" element={
+                          <AdminRoute>
+                            <AdminDashboard />
+                          </AdminRoute>
+                        } 
+                      />
+
+                  <Route 
+                  path="/admin/news" 
+                  element={
+                    <AdminRoute>
+                      <AdminNews />
+                    </AdminRoute>
+                  } />
+
+                  <Route 
+                  path="/admin/premium" 
+                  element={
+                    <AdminRoute>
+                      <AdminPremium />
+                    </AdminRoute>
+                  } />
+
+
+
+
+                
+                <Route 
+                  path="/admin/upload" 
+                  element={
+                    <AdminRoute>
+                      <AdminUpload />
+                    </AdminRoute>
+                  } 
+                />
+          </Routes> 
 
   );
 }
