@@ -8,19 +8,19 @@ const SCHOOLS = [
     id: "UI",
     name: "University of Ibadan",
     short: "UI",
-    logo: "/path-to-ui-logo.png", // Replace with your actual path
+    logo: "/ui_logo.png", // Replace with your actual path
   },
   {
     id: "UNILAG",
     name: "University of Lagos",
     short: "UNILAG",
-    logo: "/path-to-unilag-logo.png", // Replace with your actual path
+    logo: "/unilag-logo.png", // Replace with your actual path
   },
   {
     id: "OAU",
     name: "Obafemi Awolowo University",
     short: "OAU",
-    logo: "/path-to-oau-logo.png", // Replace with your actual path
+    logo: "/OAU-Logo.jpg", // Replace with your actual path
   },
 ];
 

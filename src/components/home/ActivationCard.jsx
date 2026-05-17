@@ -49,7 +49,7 @@ export default function ActivationCard() {
 
         {/* Pricing Area */}
         <div className="mb-5 flex items-baseline gap-2">
-          <span className="text-3xl font-black text-white">₦2,500</span>
+          <span className="text-3xl font-black text-white">₦2,000</span>
           <span className="text-[10px] font-bold text-[#7ac86a] uppercase">Lifetime access</span>
         </div>
 
