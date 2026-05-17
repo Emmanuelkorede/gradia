@@ -29,6 +29,14 @@ export default function ProfilePage() {
   const [aboutOpen,      setAboutOpen]      = useState(false);
   const [premiumGateOpen, setPremiumGateOpen] = useState(false);
   
+  // Feedback Form States
+  const [feedbackOpen,   setFeedbackOpen]   = useState(false);
+  const [fbCategory,     setFbCategory]     = useState("Suggestion");
+  const [fbMessage,      setFbMessage]      = useState("");
+  const [fbLoading,      setFbLoading]      = useState(false);
+  const [fbError,        setFbError]        = useState(null);
+  const [fbSuccess,      setFbSuccess]      = useState(false);
+  
   const [newName,        setNewName]        = useState(profile?.display_name ?? "");
   const [nameLoading,    setNameLoading]    = useState(false);
   const [nameError,      setNameError]      = useState(null);
@@ -101,11 +109,42 @@ export default function ProfilePage() {
     }
   }
 
+  // Submit student feedback safely to database matching RLS Policies
+  async function submitFeedback() {
+    if (!fbMessage.trim()) {
+      setFbError("Please write out a short message before submitting.");
+      return;
+    }
+    setFbLoading(true);
+    setFbError(null);
+    try {
+      const { error } = await supabase
+        .from("feedbacks")
+        .insert({
+          user_id: user.id,
+          category: fbCategory,
+          message: fbMessage.trim()
+        });
+
+      if (error) throw error;
+      setFbSuccess(true);
+      setFbMessage("");
+      setTimeout(() => {
+        setFeedbackOpen(false);
+        setFbSuccess(false);
+      }, 1500);
+    } catch (err) {
+      setFbError(err.message || "Something went wrong sending feedback.");
+    } finally {
+      setFbLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#f5f9f2] dark:bg-[#0b160a] font-sans pb-24 transition-colors duration-200">
       
       {/* ── Hero section ───────────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-[#0d2c08] via-[#1a4a10] to-[#0e3208] padding pt-14 px-5 pb-7 flex flex-col items-center text-center relative overflow-hidden">
+      <div className="bg-gradient-to-br from-[#0d2c08] via-[#1a4a10] to-[#0e3208] pt-14 px-5 pb-7 flex flex-col items-center text-center relative overflow-hidden">
         <div className="absolute top-[-60px] left-[-60px] w-[200px] h-[200px] rounded-full pointer-events-none bg-[radial-gradient(circle,rgba(90,200,72,.18),transparent_70%)]" />
         <div className="absolute bottom-[-40px] right-[-40px] w-[160px] h-[160px] rounded-full pointer-events-none bg-[radial-gradient(circle,rgba(61,120,48,.22),transparent_70%)]" />
 
@@ -127,7 +166,7 @@ export default function ProfilePage() {
         </div>
 
         <h1 className="font-serif text-[22px] font-black text-white mb-1.5 leading-none">{profile?.display_name ?? "Student"}</h1>
-        <p className="text-[11.5px] color text-white/45 mb-3">{user?.email}</p>
+        <p className="text-[11.5px] text-white/45 mb-3">{user?.email}</p>
 
         <div className="flex items-center justify-center gap-1.5 flex-wrap">
           {isPremium ? (
@@ -272,6 +311,24 @@ export default function ProfilePage() {
         <div className="bg-white dark:bg-[#111e0f] border border-transparent dark:border-[#1f3319] shadow-xs rounded-[20px] overflow-hidden">
           <p className="text-[10px] font-bold uppercase tracking-wider text-[#6a9e5e] p-[13px_16px_8px] border-b border-green-900/5 dark:border-green-900/10">About & Support</p>
           
+          <div className="flex items-center gap-3 p-[13px_16px] border-b border-green-900/5 dark:border-green-900/5 last:border-b-0 cursor-pointer active:bg-green-900/[0.04] dark:active:bg-green-900/[0.08]" onClick={() => navigate('/notifications')}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base bg-orange-500/12">📢</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13.5px] font-semibold text-[#1a3312] dark:text-[#d8f0c8] leading-tight mb-0.5">Official Updates Board</p>
+              <p className="text-[11px] text-[#9ab88a] font-medium">View platform news & target institutional updates</p>
+            </div>
+            <svg className="text-[#c8e0b0] dark:text-[#2a4e22] shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+
+          <div className="flex items-center gap-3 p-[13px_16px] border-b border-green-900/5 dark:border-green-900/5 last:border-b-0 cursor-pointer active:bg-green-900/[0.04] dark:active:bg-green-900/[0.08]" onClick={() => setFeedbackOpen(true)}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base bg-teal-500/12">✍️</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13.5px] font-semibold text-[#1a3312] dark:text-[#d8f0c8] leading-tight mb-0.5">Send Feedback</p>
+              <p className="text-[11px] text-[#9ab88a] font-medium">Report bugs, request features or ask questions</p>
+            </div>
+            <svg className="text-[#c8e0b0] dark:text-[#2a4e22] shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+          </div>
+
           <div className="flex items-center gap-3 p-[13px_16px] border-b border-green-900/5 dark:border-green-900/5 last:border-b-0 cursor-pointer active:bg-green-900/[0.04] dark:active:bg-green-900/[0.08]" onClick={() => setAboutOpen(true)}>
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base bg-green-500/12"><GradiaLogo size={22} /></div>
             <div className="flex-1 min-w-0">
@@ -300,11 +357,71 @@ export default function ProfilePage() {
       </div>
 
       {/* Modals */}
+      
+      {/* Interactive Feedback Modal Form */}
+      
+{/* Interactive Feedback Modal Form (Space-Saving Version) */}
+<ProfileModal isOpen={feedbackOpen} onClose={() => setFeedbackOpen(false)} title="Submit Feedback">
+  <div className="pb-2">
+    {fbSuccess ? (
+      <div className="text-center py-6">
+        <span className="text-3xl">🚀</span>
+        <p className="text-sm font-bold text-[#1a3312] dark:text-[#d8f0c8] mt-2">Feedback Sent!</p>
+        <p className="text-xs text-[#5a7e4e]">Thank you for helping us make Gradia better.</p>
+      </div>
+    ) : (
+      <>
+        {/* Category Dropdown (Saves lots of vertical space) */}
+        <div className="mb-3">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-[#6a9e5e] block mb-1">Category</label>
+          <select
+            value={fbCategory}
+            onChange={(e) => setFbCategory(e.target.value)}
+            className="w-full bg-[#f0f8eb] dark:bg-[#1a2e17] border border-[#c8e0b8] dark:border-[#243d1e] rounded-xl p-2 text-xs font-bold text-[#1a3312] dark:text-[#e8f5e4] outline-none focus:border-[#5a9e48]"
+          >
+            {['Suggestion', 'Bug', 'Question', 'Other'].map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Message Entry Area */}
+        <div className="mb-2">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-[#6a9e5e] block mb-1">Your Message</label>
+          <textarea
+            className="w-full bg-[#f0f8eb] dark:bg-[#1a2e17] border border-[#c8e0b8] dark:border-[#243d1e] rounded-xl p-2.5 text-xs text-[#1a3312] dark:text-[#e8f5e4] outline-none focus:border-[#5a9e48] min-h-[70px] resize-none"
+            value={fbMessage}
+            onChange={(e) => setFbMessage(e.target.value)}
+            placeholder="Type details here..."
+            maxLength={1000}
+          />
+        </div>
+
+        <div className="flex items-center justify-between mt-1 mb-3">
+          {fbError ? (
+            <p className="text-[11px] text-red-600">⚠ {fbError}</p>
+          ) : (
+            <div />
+          )}
+          <p className="text-[10px] text-[#9ab88a]">{fbMessage.length} / 1000</p>
+        </div>
+
+        {/* Form Action Submit Triggers */}
+        <div className="flex justify-end gap-2 border-t border-green-900/5 pt-3">
+          <Button variant="ghost" size="sm" onClick={() => setFeedbackOpen(false)}>Cancel</Button>
+          <Button size="md" loading={fbLoading} onClick={submitFeedback}>Submit</Button>
+        </div>
+      </>
+    )}
+  </div>
+</ProfileModal>
+
+
       <ProfileModal isOpen={editNameOpen} onClose={() => setEditNameOpen(false)} title="Change Display Name">
         <div className="pb-1">
           <p className="text-[12.5px] text-[#5a7e4e] mb-3 leading-relaxed">This name is shown on the leaderboard and throughout the app.</p>
           <input
-            className="w-100 bg-[#f0f8eb] dark:bg-[#1a2e17] border border-[#c8e0b8] dark:border-[#243d1e] rounded-xl p-[13px_16px] text-base text-[#1a3312] dark:text-[#e8f5e4] outline-none focus:border-[#5a9e48] transition-all"
+            className="w-full bg-[#f0f8eb] dark:bg-[#1a2e17] border border-[#c8e0b8] dark:border-[#243d1e] rounded-xl p-[13px_16px] text-base text-[#1a3312] dark:text-[#e8f5e4] outline-none focus:border-[#5a9e48] transition-all"
             type="text"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
