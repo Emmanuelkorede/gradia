@@ -15,6 +15,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard"
 import AdminNews from "./pages/admin/AdminNews" ;
 import AdminPremium from "./pages/admin/adminpremuim";
 import AdminUpload from "./pages/admin/AdminUpload";
+import PrivacyPolicy from "./pages/Privacypolicypage";
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/onboarding" element={<OnboardingPage />} />
               <Route path="/premium" element={<PremiumPage />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
               <Route  path="/admin" element={
                           <AdminRoute>
