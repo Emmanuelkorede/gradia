@@ -17,8 +17,8 @@ export default function PremiumPage() {
   const [checkingExisting, setCheckingExisting] = useState(true);
 
   // Bank Info Configuration Constants
-  const BANK_ACCOUNT = "1234567890"; // ⚠️ Replace with your actual bank account
-  const BANK_NAME = "Opay / Moniepoint"; // ⚠️ Replace with your actual bank name
+  const BANK_ACCOUNT = "0000000000000"; // ⚠️ Replace with your actual bank account
+  const BANK_NAME = "In Development"; // ⚠️ Replace with your actual bank name
   const ACCOUNT_NAME = "Gradia EduTech"; // ⚠️ Replace with your actual name
 
   // Check if the current user already has an active or pending transmission
