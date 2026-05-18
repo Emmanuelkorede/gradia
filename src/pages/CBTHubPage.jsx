@@ -9,14 +9,13 @@ import { HiLightningBolt, HiBookOpen, HiCheckCircle } from "react-icons/hi";
 
 const SUBJECTS_BY_SCHOOL = {
   UI: [
-    "aptitude", "Mathematics", "Biology", "Chemistry",
+    "English", "Mathematics", "Biology", "Chemistry",
     "Physics", "Economics", "Government", "Literature in English",
-    "Geography", "History", "Agricultural Science", "Further Mathematics",
   ],
   UNILAG: [
-    "English Language", "Mathematics", "Biology", "Chemistry",
+    "English", "Mathematics", "Biology", "Chemistry",
     "Physics", "Economics", "Government", "Literature",
-    "Commerce", "Accounting", "Geography", "Civic Education",
+    "Commerce",
   ],
   OAU: [
     "Aptitude", "Mathematics", "Biology", "Chemistry",
