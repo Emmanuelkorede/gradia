@@ -33,6 +33,7 @@ export default function App() {
         <Route path="/cbt/result" element={<ResultPage />} />
         <Route path="/notifications" element={<NotificationPage />} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/notifications/:id" element={<NotificationPage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/premium" element={<PremiumPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
