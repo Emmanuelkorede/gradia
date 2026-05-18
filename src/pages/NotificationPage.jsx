@@ -145,7 +145,7 @@ export default function NotificationPage() {
   // 3. System Native Apps Share Menu
   async function handleShare(e, noti) {
     e.stopPropagation(); // Avoid triggering row click modal opening
-    const shareUrl = `https://gradia.app/notifications/${noti.id}`; // App production url mapping placeholder
+    const shareUrl = `https://gradia-cbt.vercel.app/notifications/${noti.id}`; // App production url mapping placeholder
     const shareText = `Check this news out on Gradia: ${noti.title}`;
 
     if (navigator.share) {

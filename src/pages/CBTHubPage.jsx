@@ -15,13 +15,13 @@ const SUBJECTS_BY_SCHOOL = {
   ],
   UNILAG: [
     "English Language", "Mathematics", "Biology", "Chemistry",
-    "Physics", "Economics", "Government", "Literature in English",
+    "Physics", "Economics", "Government", "Literature",
     "Commerce", "Accounting", "Geography", "Civic Education",
   ],
   OAU: [
     "Aptitude", "Mathematics", "Biology", "Chemistry",
-    "Physics", "Economics", "Government", "Literature in English",
-    "Yoruba", "History", "Agricultural Science", "Further Mathematics",
+    "Physics", "Economics", "Government", "Literature",
+
   ],
 };
 
