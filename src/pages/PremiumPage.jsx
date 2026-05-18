@@ -18,8 +18,8 @@ export default function PremiumPage() {
 
   // Bank Info Configuration Constants
   const BANK_ACCOUNT = "0000000000000"; // ⚠️ Replace with your actual bank account
-  const BANK_NAME = "In Development"; // ⚠️ Replace with your actual bank name
-  const ACCOUNT_NAME = "Gradia EduTech"; // ⚠️ Replace with your actual name
+  const BANK_NAME = "launched soon"; // ⚠️ Replace with your actual bank name
+  const ACCOUNT_NAME = "Gradia Edus"; // ⚠️ Replace with your actual name
 
   // Check if the current user already has an active or pending transmission
   useEffect(() => {

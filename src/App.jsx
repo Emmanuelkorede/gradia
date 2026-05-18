@@ -18,6 +18,7 @@ import AdminUpload from "./pages/admin/AdminUpload";
 import PrivacyPolicy from "./pages/Privacypolicypage";
 
 import PWAInstallBanner from "./components/PWAInstallBanner";
+import UpdatePrompt from "./components/UpdatePrompt";
 
 export default function App() {
   return (
@@ -77,6 +78,7 @@ export default function App() {
       </Routes>
 
       <PWAInstallBanner />
+      <UpdatePrompt />
     </>
   );
 }
