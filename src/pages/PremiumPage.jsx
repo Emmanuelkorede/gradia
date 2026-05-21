@@ -17,9 +17,9 @@ export default function PremiumPage() {
   const [checkingExisting, setCheckingExisting] = useState(true);
 
   // Bank Info Configuration Constants
-  const BANK_ACCOUNT = "01233ss000000djdjdj0"; 
-  const BANK_NAME = "launched soon"; 
-  const ACCOUNT_NAME = "Gradia Edus"; 
+  const BANK_ACCOUNT = "9130333471"; 
+  const BANK_NAME = "Palmpay"; 
+  const ACCOUNT_NAME = "Emmanuel Korede Job"; 
 
   // Check if the current user already has an active or pending transmission
   useEffect(() => {

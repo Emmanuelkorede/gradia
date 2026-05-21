@@ -11,7 +11,7 @@ export default function AdminLayout({ children }) {
   const isActive = (path) => location.pathname === path;
 
   // 🔒 Super Admin strict check matching your exact id
-  const SUPER_ADMIN_ID = "988219a6-5458-4545-b2c7-33f7ba89d532";
+  const SUPER_ADMIN_ID = "988219a6-5458-4545-b2c7-33f7ba80d532";
   const isSuperAdmin = user?.id === SUPER_ADMIN_ID;
 
   const navItems = [

@@ -29,25 +29,21 @@ export default function AdminPremium() {
 
       if (subError) throw subError;
 
-      const processedSubmissions = await Promise.all(
-        (submissionData || []).map(async (sub) => {
-          const { data } = supabase.storage
-            .from("payment_receipts")
-            .getPublicUrl(sub.image_path);
-          
-          return { ...sub, computed_url: data.publicUrl };
-        })
-      );
-      setSubmissions(processedSubmissions);
+      const processedSubmissions = (submissionData || []).map((sub) => {
+  const { data } = supabase.storage
+    .from("payment_receipts")
+    .getPublicUrl(sub.image_path);
+  
+  return { ...sub, computed_url: data?.publicUrl || "" };
+});
+setSubmissions(processedSubmissions);
 
       // 2. Fetch Regular Students list for fallback search panel
-      const { data: profileData, error: profError } = await supabase
-        .from("profiles")
-        .select("id, email, is_premium")
-        .order("created_at", { ascending: false });
+const { data: profileData, error: profError } = await supabase
+  .rpc("get_all_students_for_admin"); // 👈 Calls your secure database pipeline directly
 
-      if (profError) throw profError;
-      setAllStudents(profileData || []);
+if (profError) throw profError;
+setAllStudents(profileData || []);
 
     } catch (err) {
       console.error("Error loading administration data map:", err.message);
