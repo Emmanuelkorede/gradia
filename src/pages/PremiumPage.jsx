@@ -17,7 +17,7 @@ export default function PremiumPage() {
   const [checkingExisting, setCheckingExisting] = useState(true);
 
   // Bank Info Configuration Constants
-  const BANK_ACCOUNT = "01233ss0000000000"; 
+  const BANK_ACCOUNT = "01233ss000000djdjdj0"; 
   const BANK_NAME = "launched soon"; 
   const ACCOUNT_NAME = "Gradia Edus"; 
 
