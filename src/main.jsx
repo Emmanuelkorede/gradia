@@ -7,6 +7,7 @@ import { StrictMode } from "react";
 import App from './App.jsx'
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import './index.css'
+import 'katex/dist/katex.min.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

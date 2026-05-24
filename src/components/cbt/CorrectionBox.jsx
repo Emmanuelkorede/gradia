@@ -1,4 +1,7 @@
 import { useState } from "react";
+// 🚀 STEP 1: IMPORT THE RENDERER COMPONENT
+import QuestionRenderer from "../QuestionRender"; 
+// Adjust path to "../../components/QuestionRenderer" if this file is deep inside your components folders!
 
 export default function CorrectionBox({
   question         = {},
@@ -71,9 +74,10 @@ export default function CorrectionBox({
 
       {/* Body */}
       <div className="p-3.5 space-y-3">
-        <p className={`font-serif text-[13.5px] font-bold leading-relaxed ${isCorrect ? "text-green-900 dark:text-green-100" : isSkipped ? "text-gray-800 dark:text-gray-200" : "text-red-900 dark:text-red-100"}`}>
-          {question_text}
-        </p>
+        {/* 🚀 STEP 2: FIX QUESTION TEXT SLOT */}
+        <div className={`font-serif text-[13.5px] font-bold leading-relaxed ${isCorrect ? "text-green-900 dark:text-green-100" : isSkipped ? "text-gray-800 dark:text-gray-200" : "text-red-900 dark:text-red-100"}`}>
+          <QuestionRenderer text={question_text} />
+        </div>
 
         <div className="flex flex-col gap-1.5">
           {["A", "B", "C", "D"].map((opt) => {
@@ -92,7 +96,10 @@ export default function CorrectionBox({
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 ${isThisCorrect ? 'bg-green-600 text-white' : isThisSelected ? 'bg-red-600 text-white' : 'bg-gray-200 dark:bg-white/10 text-gray-600'}`}>
                   {opt}
                 </div>
-                <span className="flex-1">{options[opt]}</span>
+                {/* 🚀 STEP 3: FIX MULTIPLE CHOICE LABELS */}
+                <span className="flex-1 w-full">
+                  <QuestionRenderer text={options[opt]} />
+                </span>
                 {isThisCorrect && (
                   <svg className="flex-shrink-0 text-green-600" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20 6L9 17l-5-5"/>
@@ -129,9 +136,10 @@ export default function CorrectionBox({
                   <path d="M12 16v-4M12 8h.01"/>
                 </svg>
               </div>
-              <p className="text-xs text-blue-900/80 dark:text-blue-300 leading-relaxed font-medium">
-                {explanation}
-              </p>
+              {/* 🚀 STEP 4: FIX THE EXPLANATION DATA FEED */}
+              <div className="text-xs text-blue-900/80 dark:text-blue-300 leading-relaxed font-medium w-full">
+                <QuestionRenderer text={explanation} />
+              </div>
             </div>
           )}
         </div>

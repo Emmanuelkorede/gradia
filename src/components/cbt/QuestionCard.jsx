@@ -1,4 +1,5 @@
 import { HiCheck, HiX, HiLightBulb, HiAcademicCap } from "react-icons/hi";
+import QuestionRenderer from "../QuestionRender";
 
 const SUBJECT_THEMES = {
   "Mathematics": { bg: "bg-blue-50/50", darkBg: "dark:bg-blue-900/10", accent: "text-blue-500", border: "border-blue-100", darkBorder: "dark:border-blue-800/30", text: "text-blue-700", darkText: "dark:text-blue-300" },
@@ -23,7 +24,7 @@ export default function QuestionCard({
   const isStudy = mode === "study";
   const hasAnswered = selectedOption !== null;
 
-  return (
+return (
     <div className="w-full max-w-2xl mx-auto bg-white dark:bg-[#111e0f] rounded-2xl border border-green-900/10 dark:border-white/5 shadow-sm overflow-hidden">
       
       {/* Tight Header */}
@@ -42,9 +43,10 @@ export default function QuestionCard({
 
       {/* Question Text - Compact Padding */}
       <div className="px-5 py-6">
-        <h2 className="text-[15.5px] font-bold text-[#1a3312] dark:text-[#d8f0c8] font-serif leading-snug">
-          {question_text}
-        </h2>
+        <div className="text-[15.5px] font-bold text-[#1a3312] dark:text-[#d8f0c8] font-serif leading-snug">
+          {/* 🚀 FIXED: Swapped raw question_text text slot out */}
+          <QuestionRenderer text={question_text} />
+        </div>
       </div>
 
       {/* Options - Tight Spacing */}
@@ -81,9 +83,10 @@ export default function QuestionCard({
                 {isStudy && hasAnswered && isCorrect ? <HiCheck size={14} /> : 
                  isStudy && hasAnswered && isWrong ? <HiX size={14} /> : opt}
               </div>
-              <span className="text-[13px] font-medium leading-tight">
-                {options[opt]}
-              </span>
+              <div className="text-[13px] font-medium leading-tight w-full">
+                {/* 🚀 FIXED: Swapped out individual option string blocks */}
+                <QuestionRenderer text={options[opt]} />
+              </div>
             </button>
           );
         })}
@@ -97,9 +100,10 @@ export default function QuestionCard({
           </div>
           <div className="flex-1">
             <span className="block text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-0.5">Explanation</span>
-            <p className="text-[12px] font-medium text-blue-900/80 dark:text-blue-200/70 leading-relaxed italic">
-              {explanation}
-            </p>
+            <div className="text-[12px] font-medium text-blue-900/80 dark:text-blue-200/70 leading-relaxed italic">
+              {/* 🚀 FIXED: Swapped raw explanation text block out */}
+              <QuestionRenderer text={explanation} />
+            </div>
           </div>
         </div>
       )}
