@@ -127,14 +127,14 @@ export default function AdminUpload() {
             </div>
           </div>
 
-          {/* Policy Information Flag */}
+          {/* Policy Information Flag 
           <div className="text-[11px] text-[#4a6e42] dark:text-gray-400 leading-relaxed bg-green-900/5 dark:bg-[#0d1f0e] p-3 rounded-xl border border-green-900/5 dark:border-emerald-900/20">
             <strong className="text-emerald-600 dark:text-emerald-400 uppercase tracking-wide block mb-0.5 text-[10px]">
               Database Policy Defaults:
             </strong>
             Bypasses premium parameter mapping and maps strictly to <code className="text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1 py-0.5 rounded font-mono text-[10px]">is_free = false</code>.
           </div>
-
+           */}
           {/* Action Trigger */}
           {questions.length > 0 && (
             <button
