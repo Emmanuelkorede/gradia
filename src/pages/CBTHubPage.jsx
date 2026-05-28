@@ -19,8 +19,7 @@ const SUBJECTS_BY_SCHOOL = {
   ],
   OAU: [
     "Aptitude", "Mathematics", "Biology", "Chemistry",
-    "Physics", "Economics", "Government", "Literature",
-
+    "Physics", "Economics", "Government", "Literature", "Geography"
   ],
 };
 
